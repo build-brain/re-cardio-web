@@ -1,4 +1,5 @@
 import { createWebHistory, createRouter } from "vue-router";
+import { loadLocaleMessages, setI18nLanguage } from '../i18n';
 
 
 const routes = [
@@ -7,20 +8,19 @@ const routes = [
     name: "default",
     component: () => import("../views/dashboard/index.vue"),
   },
-
-]
+];
 const router = createRouter({
- 
-    history: createWebHistory(),
-    routes,
-  
-    scrollBehavior(to, from, savedPosition) {
-      if (savedPosition) {
-        return savedPosition;
-      } else {
-        return { top: 0, left: 0 };
-      }
-    },
-  });
+  history: createWebHistory(),
+  routes,
+
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0, left: 0 };
+    }
+  },
+});
+
 
 export default router;

@@ -3,6 +3,9 @@
 import simplebar from "simplebar-vue";
 
 import i18n from "../i18n";
+import flag_uz from '@/assets/images/flags/uz.svg';
+import flag_ru from '@/assets/images/flags/uz.svg';
+
 
 /**
  * Nav-bar Component
@@ -12,12 +15,12 @@ export default {
     return {
       user: null,
       languages: [{
-        flag: require("@/assets/images/flags/uz.svg"),
+        flag: flag_uz,
         language: "uz",
         title: "o'zbekcha",
       },
       {
-        flag: require("@/assets/images/flags/russia.svg"),
+        flag:flag_ru,
         language: "ru",
         title: "русский",
       },
@@ -203,7 +206,7 @@ export default {
         i18n.global.locale = savedLanguage;
       } else {
         // Если нет сохраненных значений, используем язык по умолчанию
-        this.flag = process.env.VUE_APP_I18N_LOCALE;
+        this.flag = import.meta.env.VUE_APP_I18N_LOCALE;
         this.languages.forEach((item) => {
           if (item.language == this.flag) {
             document.getElementById("header-lang-img").setAttribute("src", item.flag);

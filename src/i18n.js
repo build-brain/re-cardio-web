@@ -1,24 +1,32 @@
 import { createI18n } from 'vue-i18n';
 
-function loadLocaleMessages() {
-  const locales = require.context('./lang', true, /[A-Za-z0-9-_,\s]+\.json$/i);
-  const messages = {};
-  locales.keys().forEach((key) => {
-    const matched = key.match(/([A-Za-z0-9-_]+)\./i);
-    if (matched && matched.length > 1) {
-      const locale = matched[1];
-      messages[locale] = locales(key);
-    }
-  });
-  return messages;
+import { nextTick } from 'vue'
+
+
+export default function setupI18n(options = { locale: 'ru' }) {
+  const i18n = createI18n(options)
+  setI18nLanguage(i18n, options.locale)
+  return i18n
 }
 
+export  function setI18nLanguage(i18n, locale) {
+  if (i18n.mode === 'legacy') {
+    i18n.global.locale = locale
+  } else {
+    i18n.global.locale.value = locale
+  }
 
+  document.querySelector('html').setAttribute('lang', locale)
+}
 
+export  async function loadLocaleMessages(i18n, locale) {
+  // load locale messages with dynamic import
+  const messages = await import(
+    /* webpackChunkName: "locale-[request]" */ `./lang/${locale}.json`
+  )
 
-export default createI18n({
-  locale: localStorage.getItem('language') || 'ru',
-  fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'ru',
-  messages: loadLocaleMessages(),
-});
+  // set locale and locale message
+  i18n.global.setLocaleMessage(locale, messages.default)
 
+  return nextTick()
+}
