@@ -11,7 +11,11 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "vue": "^3.4.21"
+    "bootstrap": "^5.3.3",
+    "bootstrap-vue-next": "^0.18.0",
+    "simplebar-vue": "^2.3.4",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
@@ -19,6 +23,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
     "jsdom": "^24.0.0",
+    "sass": "^1.77.2",
     "vite": "^5.2.8",
     "vitest": "^1.4.0"
   }
