@@ -1,5 +1,9 @@
 <script>
+
 import simplebar from "simplebar-vue";
+
+import i18n from "../i18n";
+
 /**
  * Nav-bar Component
  */
@@ -13,7 +17,7 @@ export default {
         title: "o'zbekcha",
       },
       {
-        flag: require("@/assets/images/flags/ru.svg"),
+        flag: require("@/assets/images/flags/russia.svg"),
         language: "ru",
         title: "русский",
       },
@@ -32,7 +36,7 @@ export default {
   },
 
   methods: {
- 
+
     isCustomDropdown() {
       //Search bar
       var searchOptions = document.getElementById("search-close-options");
