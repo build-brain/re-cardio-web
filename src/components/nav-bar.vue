@@ -1,11 +1,12 @@
 <script>
+import { layoutMethods } from "@/state/helpers";
 
 import simplebar from "simplebar-vue";
+import flag_uz from '@/assets/images/flags/uz.svg';
+import flag_ru from '@/assets/images/flags/ru.svg';
+
 
 import i18n from "../i18n";
-import flag_uz from '@/assets/images/flags/uz.svg';
-import flag_ru from '@/assets/images/flags/uz.svg';
-
 
 /**
  * Nav-bar Component
@@ -20,7 +21,7 @@ export default {
         title: "o'zbekcha",
       },
       {
-        flag:flag_ru,
+        flag: flag_ru,
         language: "ru",
         title: "русский",
       },
@@ -39,48 +40,9 @@ export default {
   },
 
   methods: {
+    ...layoutMethods,
 
-    isCustomDropdown() {
-      //Search bar
-      var searchOptions = document.getElementById("search-close-options");
-      var dropdown = document.getElementById("search-dropdown");
-      var searchInput = document.getElementById("search-options");
 
-      searchInput.addEventListener("focus", () => {
-        var inputLength = searchInput.value.length;
-        if (inputLength > 0) {
-          dropdown.classList.add("show");
-          searchOptions.classList.remove("d-none");
-        } else {
-          dropdown.classList.remove("show");
-          searchOptions.classList.add("d-none");
-        }
-      });
-
-      searchInput.addEventListener("keyup", () => {
-        var inputLength = searchInput.value.length;
-        if (inputLength > 0) {
-          dropdown.classList.add("show");
-          searchOptions.classList.remove("d-none");
-        } else {
-          dropdown.classList.remove("show");
-          searchOptions.classList.add("d-none");
-        }
-      });
-
-      searchOptions.addEventListener("click", () => {
-        searchInput.value = "";
-        dropdown.classList.remove("show");
-        searchOptions.classList.add("d-none");
-      });
-
-      document.body.addEventListener("click", (e) => {
-        if (e.target.getAttribute("id") !== "search-options") {
-          dropdown.classList.remove("show");
-          searchOptions.classList.add("d-none");
-        }
-      });
-    },
 
     toggleHamburgerMenu() {
       var windowSize = document.documentElement.clientWidth;
@@ -197,15 +159,14 @@ export default {
       const savedLanguage = localStorage.getItem('language');
       const savedFlag = localStorage.getItem('flag');
       if (savedLanguage && savedFlag) {
-        // Устанавливаем язык и флаг
+
         this.lan = savedLanguage;
         this.flag = savedFlag;
-        // Устанавливаем флаг в изображении в шапке
-        document.getElementById("header-lang-img").setAttribute("src", savedFlag);
-        // Устанавливаем язык для i18n
+       
+      
         i18n.global.locale = savedLanguage;
       } else {
-        // Если нет сохраненных значений, используем язык по умолчанию
+       
         this.flag = import.meta.env.VUE_APP_I18N_LOCALE;
         this.languages.forEach((item) => {
           if (item.language == this.flag) {
@@ -226,7 +187,7 @@ export default {
           .getElementById("topnav-hamburger-icon")
           .addEventListener("click", this.toggleHamburgerMenu);
 
-      this.isCustomDropdown();
+  
     },
     created() {
       this.initTheme();
@@ -241,7 +202,28 @@ export default {
     <div class="layout-width">
       <div class="navbar-header">
         <div class="d-flex">
-        
+
+
+          <!-- LOGO -->
+          <div class="navbar-brand-box horizontal-logo">
+            <router-link to="/" class="logo logo-dark">
+              <span class="logo-sm">
+                <img src="@/assets/images/logo-sm.png" alt="" height="22" />
+              </span>
+              <span class="logo-lg">
+                <img src="@/assets/images/cardio_plus_logo.svg" alt="" height="17" />
+              </span>
+            </router-link>
+
+            <router-link to="/" class="logo logo-light">
+              <span class="logo-sm">
+                <img src="@/assets/images/logo-sm.png" alt="" height="22" />
+              </span>
+              <span class="logo-lg">
+                <img src="@/assets/images/cardio_plus_logo.svg" alt="" height="17" />
+              </span>
+            </router-link>
+          </div>
 
 
           <BButton variant="white" type="button"

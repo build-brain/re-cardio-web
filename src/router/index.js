@@ -1,5 +1,4 @@
 import { createWebHistory, createRouter } from "vue-router";
-import { loadLocaleMessages, setI18nLanguage } from '../i18n';
 
 
 const routes = [

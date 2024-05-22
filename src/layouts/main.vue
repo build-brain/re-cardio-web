@@ -1,7 +1,23 @@
-<script setup>
+<script>
+import { layoutComputed } from "@/state/helpers";
 
 import Vertical from "./vertical.vue";
 
+export default {
+    components: {
+        Vertical,
+
+    },
+    data() {
+        return {};
+    },
+    computed: {
+        ...layoutComputed,
+    },
+    mounted() {
+        // document.querySelector("html").setAttribute('dir', 'rtl');
+    }
+};
 </script>
 
 <template>
@@ -13,3 +29,4 @@ import Vertical from "./vertical.vue";
 
     </div>
 </template>
+

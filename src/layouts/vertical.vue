@@ -1,9 +1,11 @@
 <script>
 import router from "@/router";
 import simplebar from "simplebar-vue";
+import { layoutComputed } from "@/state/helpers";
 
 import NavBar from "@/components/nav-bar.vue";
 import Menu from "@/components/menu.vue";
+import RightBar from "@/components/right-bar.vue";
 
 localStorage.setItem('hoverd', false);
 
@@ -11,13 +13,15 @@ localStorage.setItem('hoverd', false);
  * Vertical layout
  */
 export default {
-  components: { NavBar, Menu, simplebar },
+  components: { NavBar, RightBar, Menu, simplebar },
   data() {
     return {
       isMenuCondensed: false,
     };
   },
-
+  computed: {
+    ...layoutComputed,
+  },
   created: () => {
     document.body.removeAttribute("data-layout", "horizontal");
     document.body.removeAttribute("data-topbar", "dark");
@@ -126,7 +130,7 @@ export default {
               <img src="@/assets/images/HEART.svg" alt="" height="22" />
             </span>
             <span class="logo-lg">
-                <img src="@/assets/images/cardio_plus_logo.svg" alt="" height="17" />
+              <img src="@/assets/images/cardio_plus_logo.svg" alt="" height="17" />
             </span>
           </router-link>
           <BButton size="sm" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
@@ -142,9 +146,13 @@ export default {
         </simplebar>
         <div class="sidebar-background"></div>
       </div>
-  
+      <!-- Left Sidebar End -->
+      <!-- Vertical Overlay-->
       <div class="vertical-overlay" id="overlay"></div>
     </div>
+    <!-- ============================================================== -->
+    <!-- Start Page Content here -->
+    <!-- ============================================================== -->
 
     <div class="main-content">
       <div class="page-content">
@@ -156,6 +164,6 @@ export default {
       </div>
    
     </div>
-  
+    <RightBar/>
   </div>
 </template>

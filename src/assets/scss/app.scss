@@ -1,7 +1,16 @@
+/*
+Template Name: Velzon - Admin & Dashboard Template
+Author: Themesbrand
+Version: 4.1.0
+Website: https://themesbrand.com/
+Contact: support@themesbrand.com
+File: Main Css File
+*/
 
 
 //Fonts
 @import "fonts/fonts";
+@import "./icons.scss"; 
 
 //Core files
 @import "./node_modules/bootstrap/scss/functions";
@@ -9,7 +18,7 @@
 @import "variables";
 @import "variables-custom";
 @import "variables-dark";
-
+@import "variables-galaxy-dark";
 @import "./node_modules/bootstrap/scss/mixins";
 @import "bootstrap";
 
@@ -58,13 +67,68 @@
 @import "components/form-control";
 @import "components/list-group";
 
+// Plugins
+@import "plugins/custom-scrollbar";
+@import "plugins/prismjs";
+@import "plugins/sweetalert2";
+@import "plugins/dropzone";
+@import "plugins/range-slider";
+@import "plugins/sortablejs";
+@import "plugins/tour";
+@import "plugins/swiper";
+@import "plugins/multijs";
+@import "plugins/colorpicker";
+@import "plugins/filepond";
+@import "plugins/form-input-spin";
+@import "plugins/ckeditor";
+@import "plugins/quilljs";
+@import "plugins/gridjs";
+@import "plugins/listjs";
+@import "plugins/apexcharts";
+@import "plugins/chartjs";
+@import "plugins/echarts";
+@import "plugins/google-map";
+@import "plugins/autocomplete";
+@import "plugins/vector-maps";
+@import "plugins/leaflet-maps";
+@import "plugins/fullcalendar";
+@import "plugins/emoji-picker";
+@import "plugins/datatables";
+@import "plugins/select2";
+
+// Plugins
+@import "plugins/toastify";
+@import "plugins/choices";
+@import "plugins/flatpicker";
+@import "plugins/flag-input";
+
 // Pages
-
+@import "pages/authentication";
 @import "pages/dashboard";
-
+@import "pages/timeline";
+@import "pages/gallery";
 @import "pages/errors";
+@import "pages/profile";
+@import "pages/sitemap";
+@import "pages/team";
+@import "pages/coming-soon";
+@import "pages/search-results";
+@import "pages/ecommerce";
+@import "pages/invoice";
+@import "pages/chat";
+@import "pages/email";
+@import "pages/kanban";
+@import "pages/landing";
 
+@import "pages/file-manager";
+@import "pages/to-do";
+@import "pages/jobs";
+@import "pages/job-landing";
 
 @import "./custom.scss";
 
 
+// @import "../scss/rtl/components-rtl";
+// @import "../scss/rtl/layouts-rtl";
+// @import "../scss/rtl/pages-rtl";
+// @import "../scss/rtl/plugins-rtl";

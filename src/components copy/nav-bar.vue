@@ -1,0 +1,704 @@
+<script>
+
+import simplebar from "simplebar-vue";
+import { layoutMethods } from "@/state/helpers";
+
+import i18n from "../i18n";
+import flag_uz from '@/assets/images/flags/uz.svg';
+import flag_ru from '@/assets/images/flags/uz.svg';
+
+
+/**
+ * Nav-bar Component
+ */
+export default {
+  data() {
+    return {
+      user: null,
+      languages: [{
+        flag: flag_uz,
+        language: "uz",
+        title: "o'zbekcha",
+      },
+      {
+        flag:flag_ru,
+        language: "ru",
+        title: "русский",
+      },
+
+      ],
+
+      lan: i18n.locale,
+      text: null,
+      flag: null,
+      value: null,
+      myVar: 1,
+    };
+  },
+  components: {
+    simplebar
+  },
+
+  methods: {
+    ...layoutMethods,
+
+    isCustomDropdown() {
+      //Search bar
+      var searchOptions = document.getElementById("search-close-options");
+      var dropdown = document.getElementById("search-dropdown");
+      var searchInput = document.getElementById("search-options");
+
+      searchInput.addEventListener("focus", () => {
+        var inputLength = searchInput.value.length;
+        if (inputLength > 0) {
+          dropdown.classList.add("show");
+          searchOptions.classList.remove("d-none");
+        } else {
+          dropdown.classList.remove("show");
+          searchOptions.classList.add("d-none");
+        }
+      });
+
+      searchInput.addEventListener("keyup", () => {
+        var inputLength = searchInput.value.length;
+        if (inputLength > 0) {
+          dropdown.classList.add("show");
+          searchOptions.classList.remove("d-none");
+        } else {
+          dropdown.classList.remove("show");
+          searchOptions.classList.add("d-none");
+        }
+      });
+
+      searchOptions.addEventListener("click", () => {
+        searchInput.value = "";
+        dropdown.classList.remove("show");
+        searchOptions.classList.add("d-none");
+      });
+
+      document.body.addEventListener("click", (e) => {
+        if (e.target.getAttribute("id") !== "search-options") {
+          dropdown.classList.remove("show");
+          searchOptions.classList.add("d-none");
+        }
+      });
+    },
+
+    toggleHamburgerMenu() {
+      var windowSize = document.documentElement.clientWidth;
+      let layoutType = document.documentElement.getAttribute("data-layout");
+
+      document.documentElement.setAttribute("data-sidebar-visibility", "show");
+      let visiblilityType = document.documentElement.getAttribute("data-sidebar-visibility");
+
+      if (windowSize > 767) {
+        document.querySelector(".hamburger-icon").classList.toggle("open");
+
+      }
+
+      //For collapse vertical menu
+
+      if (visiblilityType === "show" && (layoutType === "vertical")) {
+        if (windowSize < 1025 && windowSize > 767) {
+          document.body.classList.remove("vertical-sidebar-enable");
+          document.documentElement.getAttribute("data-sidebar-size") == "sm" ?
+            document.documentElement.setAttribute("data-sidebar-size", "") :
+            document.documentElement.setAttribute("data-sidebar-size", "sm");
+        } else if (windowSize > 1025) {
+          document.body.classList.remove("vertical-sidebar-enable");
+          document.documentElement.getAttribute("data-sidebar-size") == "lg" ?
+            document.documentElement.setAttribute("data-sidebar-size", "sm") :
+            document.documentElement.setAttribute("data-sidebar-size", "lg");
+        } else if (windowSize <= 767) {
+          document.body.classList.add("vertical-sidebar-enable");
+          document.documentElement.setAttribute("data-sidebar-size", "lg");
+        }
+      }
+
+
+    },
+    toggleMenu() {
+      this.$parent.toggleMenu();
+    },
+
+    initFullScreen() {
+      document.body.classList.toggle("fullscreen-enable");
+      if (
+        !document.fullscreenElement &&
+        /* alternative standard method */
+        !document.mozFullScreenElement &&
+        !document.webkitFullscreenElement
+      ) {
+        // current working methods
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+          document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen(
+            Element.ALLOW_KEYBOARD_INPUT
+          );
+        }
+      } else {
+        if (document.cancelFullScreen) {
+          document.cancelFullScreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+          document.webkitCancelFullScreen();
+        }
+      }
+    },
+    setLanguage(locale, country, flag) {
+      localStorage.setItem('language', locale);
+      localStorage.setItem('flag', flag)
+      this.lan = locale;
+      this.text = country;
+      this.flag = flag;
+      document.getElementById("header-lang-img").setAttribute("src", flag);
+      i18n.global.locale = locale;
+    },
+    toggleDarkMode() {
+      const currentTheme = document.documentElement.getAttribute("data-bs-theme");
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-bs-theme", newTheme);
+
+      // Сохраняем текущую тему в локальное хранилище
+      localStorage.setItem("theme", newTheme);
+    },
+
+    initTheme() {
+    
+      const savedTheme = localStorage.getItem("theme");
+
+      if (savedTheme) {
+        document.documentElement.setAttribute("data-bs-theme", savedTheme);
+      }
+    },
+    logout() {
+      localStorage.clear();
+
+    }
+  },
+
+  computed: {
+    calculateTotalPrice() {
+      return this.cartItems.reduce((total, item) => total + parseFloat(item.itemPrice), 0).toFixed(2);
+    },
+    userFromLocalStorage() {
+        const storedUser = localStorage.getItem('user');
+        return storedUser ? JSON.parse(storedUser) : null
+    },
+  },
+
+
+    mounted() {
+      this.user = this.userFromLocalStorage;
+      const savedLanguage = localStorage.getItem('language');
+      const savedFlag = localStorage.getItem('flag');
+      if (savedLanguage && savedFlag) {
+        // Устанавливаем язык и флаг
+        this.lan = savedLanguage;
+        this.flag = savedFlag;
+        // Устанавливаем флаг в изображении в шапке
+        document.getElementById("header-lang-img").setAttribute("src", savedFlag);
+        // Устанавливаем язык для i18n
+        i18n.global.locale = savedLanguage;
+      } else {
+        // Если нет сохраненных значений, используем язык по умолчанию
+        this.flag = import.meta.env.VUE_APP_I18N_LOCALE;
+        this.languages.forEach((item) => {
+          if (item.language == this.flag) {
+            document.getElementById("header-lang-img").setAttribute("src", item.flag);
+          }
+        });
+      }
+
+      document.addEventListener("scroll", function () {
+        var pageTopbar = document.getElementById("page-topbar");
+        if (pageTopbar) {
+          document.body.scrollTop >= 50 || document.documentElement.scrollTop >= 50 ? pageTopbar.classList.add(
+            "topbar-shadow") : pageTopbar.classList.remove("topbar-shadow");
+        }
+      });
+      if (document.getElementById("topnav-hamburger-icon"))
+        document
+          .getElementById("topnav-hamburger-icon")
+          .addEventListener("click", this.toggleHamburgerMenu);
+
+      this.isCustomDropdown();
+    },
+    created() {
+      this.initTheme();
+    },
+
+
+  }
+</script>
+
+<template>
+  <header id="page-topbar">
+    <div class="layout-width">
+      <div class="navbar-header">
+        <div class="d-flex">
+        
+
+
+          <BButton variant="white" type="button"
+            class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger  material-shadow-none"
+            id="topnav-hamburger-icon">
+            <span class="hamburger-icon">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </BButton>
+
+          <!-- App Search-->
+          <form class="app-search d-none d-md-block">
+            <div class="position-relative">
+              <input type="text" class="form-control" placeholder="Search..." autocomplete="off" id="search-options"
+                value="" />
+              <span class="mdi mdi-magnify search-widget-icon"></span>
+              <span class="mdi mdi-close-circle search-widget-icon search-widget-icon-close d-none"
+                id="search-close-options"></span>
+            </div>
+            <div class="dropdown-menu dropdown-menu-lg" id="search-dropdown">
+              <simplebar data-simplebar style="max-height: 320px">
+                <div class="dropdown-header">
+                  <h6 class="text-overflow text-muted mb-0 text-uppercase">
+                    Recent Searches
+                  </h6>
+                </div>
+
+
+                <div class="dropdown-item bg-transparent text-wrap">
+                  <router-link to="/" class="btn btn-soft-secondary btn-sm rounded-pill">how to setup <i
+                      class="mdi mdi-magnify ms-1"></i></router-link>
+                  <router-link to="/" class="btn btn-soft-secondary btn-sm rounded-pill">buttons <i
+                      class="mdi mdi-magnify ms-1"></i></router-link>
+                </div>
+                <div class="dropdown-header mt-2">
+                  <h6 class="text-overflow text-muted mb-1 text-uppercase">
+                    Pages
+                  </h6>
+                </div>
+
+                <BLink href="javascript:void(0);" class="dropdown-item notify-item">
+                  <i class=" ri-bubble-chart-line align-middle fs-18 text-muted me-2"></i>
+                  <span>Analytics Dashboard</span>
+                </BLink>
+
+                <BLink href="javascript:void(0);" class="dropdown-item notify-item">
+                  <i class="ri-lifebuoy-line align-middle fs-18 text-muted me-2"></i>
+                  <span>Help Center</span>
+                </BLink>
+
+                <BLink href="javascript:void(0);" class="dropdown-item notify-item">
+                  <i class=" ri-user-settings-line align-middle fs-18 text-muted me-2"></i>
+                  <span>My account settings</span>
+                </BLink>
+
+                <div class="dropdown-header mt-2">
+                  <h6 class="text-overflow text-muted mb-2 text-uppercase">
+                    Members
+                  </h6>
+                </div>
+
+                <div class="notification-list">
+                  <BLink href="javascript:void(0);" class="d-flex dropdown-item notify-item py-2">
+                    <img src="@/assets/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs"
+                      alt="user-pic" />
+                    <div class="flex-grow-1">
+                      <h6 class="m-0">Angela Bernier</h6>
+                      <span class="fs-11 mb-0 text-muted">Manager</span>
+                    </div>
+                  </BLink>
+                  <BLink href="javascript:void(0);" class="d-flex dropdown-item notify-item py-2">
+                    <img src="@/assets/images/users/avatar-3.jpg" class="me-3 rounded-circle avatar-xs"
+                      alt="user-pic" />
+                    <div class="flex-grow-1">
+                      <h6 class="m-0">David Grasso</h6>
+                      <span class="fs-11 mb-0 text-muted">Web Designer</span>
+                    </div>
+                  </BLink>
+                  <BLink href="javascript:void(0);" class="d-flex dropdown-item notify-item py-2">
+                    <img src="@/assets/images/users/avatar-5.jpg" class="me-3 rounded-circle avatar-xs"
+                      alt="user-pic" />
+                    <div class="flex-grow-1">
+                      <h6 class="m-0">Mike Bunch</h6>
+                      <span class="fs-11 mb-0 text-muted">React Developer</span>
+                    </div>
+                  </BLink>
+                </div>
+              </simplebar>
+
+
+            </div>
+          </form>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <BDropdown class="dropdown d-md-none topbar-head-dropdown header-item" variant="ghost-secondary" dropstart
+            no-caret :offset="{ alignmentAxis: 55, crossAxis: 15, mainAxis: 0 }"
+            toggle-class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle material-shadow-none show "
+            menu-class="dropdown-menu-lg dropdown-menu-end p-0">
+            <template #button-content>
+              <i class="bx bx-search fs-22"></i>
+            </template>
+            <BDropdownItem aria-labelledby="page-header-search-dropdown">
+              <form class="p-3">
+                <div class="form-group m-0">
+                  <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search ..."
+                      aria-label="Recipient's username" />
+                    <BButton variant="primary" type="submit">
+                      <i class="mdi mdi-magnify"></i>
+                    </BButton>
+                  </div>
+                </div>
+              </form>
+            </BDropdownItem>
+          </BDropdown>
+
+          <BDropdown class="dropdown" variant="ghost-secondary" dropstart no-caret
+            :offset="{ alignmentAxis: 55, crossAxis: 15, mainAxis: -50 }"
+            toggle-class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle material-shadow-none"
+            menu-class="dropdown-menu-end">
+            <template #button-content> <img id="header-lang-img" src="@/assets/images/flags/ru.svg"
+                alt="Header Language" height="20" class="rounded">
+            </template>
+            <BLink href="javascript:void(0);" class="dropdown-item notify-item language py-2"
+              v-for="(entry, key) in languages" :data-lang="entry.language" :title="entry.title"
+              @click="setLanguage(entry.language, entry.title, entry.flag)" :key="key">
+              <img :src="entry.flag" alt="user-image" class="me-2 rounded" height="18">
+              <span class="align-middle">{{ entry.title }}</span>
+            </BLink>
+          </BDropdown>
+
+
+          <div class="ms-1 header-item d-none d-sm-flex">
+            <BButton type="button" variant="ghost-secondary"
+              class="btn-icon btn-topbar rounded-circle material-shadow-none" data-toggle="fullscreen"
+              @click="initFullScreen">
+              <i class="bx bx-fullscreen fs-22"></i>
+            </BButton>
+          </div>
+
+          <div class="ms-1 header-item d-none d-sm-flex">
+            <BButton type="button" variant="ghost-secondary"
+              class="btn-icon btn-topbar rounded-circle light-dark-mode material-shadow-none" @click="toggleDarkMode">
+              <i class="bx bx-moon fs-22"></i>
+            </BButton>
+          </div>
+
+          <BDropdown variant="ghost-dark" dropstart class="ms-1 dropdown" no-caret
+            :offset="{ alignmentAxis: 57, crossAxis: 0, mainAxis: -42 }"
+            toggle-class="btn-icon btn-topbar rounded-circle material-shadow-none"
+            id="page-header-notifications-dropdown" menu-class="dropdown-menu-lg dropdown-menu-end p-0"
+            auto-close="outside">
+            <template #button-content>
+              <i class='bx bx-bell fs-22'></i>
+              <span class="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-danger"><span
+                  class="notification-badge">3</span><span class="visually-hidden">unread
+                  messages
+                </span>
+              </span>
+            </template>
+            <div class="dropdown-head bg-primary bg-pattern rounded-top dropdown-menu-lg">
+              <div class="p-3">
+                <BRow class="align-items-center">
+                  <BCol>
+                    <h6 class="m-0 fs-16 fw-semibold text-white">
+                      Notifications
+                    </h6>
+                  </BCol>
+                  <BCol cols="auto" class="dropdown-tabs">
+                    <BBadge variant="light" class="bg-light text-body fs-13"> 4 New</BBadge>
+                  </BCol>
+                </BRow>
+              </div>
+            </div>
+            <BTabs nav-class="dropdown-tabs nav-tab-custom bg-primary px-2 pt-2">
+              <BTab title=" All (4) " class="tab-pane fade py-2 ps-2 show" id="all-noti-tab" role="tabpanel">
+                <simplebar data-simplebar style="max-height: 300px" class="pe-2">
+                  <div class="text-reset notification-item d-block dropdown-item position-relative">
+                    <div class="d-flex">
+                      <div class="avatar-xs me-3 flex-shrink-0">
+                        <span class="avatar-title bg-info-subtle text-info rounded-circle fs-16">
+                          <i class="bx bx-badge-check"></i>
+                        </span>
+                      </div>
+                      <div class="flex-grow-1">
+                        <BLink href="#!" class="stretched-link">
+                          <h6 class="mt-0 mb-2 lh-base">
+                            Your <b>Elite</b> author Graphic Optimization
+                            <span class="text-secondary">reward</span> is
+                            ready!
+                          </h6>
+                        </BLink>
+                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                          <span><i class="mdi mdi-clock-outline"></i> Just 30 sec ago</span>
+                        </p>
+                      </div>
+                      <div class="px-2 fs-15">
+                        <input class="form-check-input" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-reset notification-item d-block dropdown-item position-relative">
+                    <div class="d-flex">
+                      <img src="@/assets/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs flex-shrink-0"
+                        alt="user-pic" />
+                      <div class="flex-grow-1">
+                        <BLink href="#!" class="stretched-link">
+                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
+                            Angela Bernier
+                          </h6>
+                        </BLink>
+                        <div class="fs-13 text-muted">
+                          <p class="mb-1">
+                            Answered to your comment on the cash flow forecast's graph 🔔.
+                          </p>
+                        </div>
+                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                          <span><i class="mdi mdi-clock-outline"></i> 48 min ago</span>
+                        </p>
+                      </div>
+                      <div class="px-2 fs-15">
+                        <input class="form-check-input" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-reset notification-item d-block dropdown-item position-relative">
+                    <div class="d-flex">
+                      <div class="avatar-xs me-3 flex-shrink-0">
+                        <span class="avatar-title bg-danger-subtle text-danger rounded-circle fs-16">
+                          <i class="bx bx-message-square-dots"></i>
+                        </span>
+                      </div>
+                      <div class="flex-grow-1">
+                        <BLink href="#!" class="stretched-link">
+                          <h6 class="mt-0 mb-2 fs-13 lh-base">
+                            You have received <b class="text-success">20</b> new messages in the conversation
+                          </h6>
+                        </BLink>
+                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                          <span><i class="mdi mdi-clock-outline"></i> 2 hrs
+                            ago</span>
+                        </p>
+                      </div>
+                      <div class="px-2 fs-15">
+                        <input class="form-check-input" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-reset notification-item d-block dropdown-item position-relative">
+                    <div class="d-flex">
+                      <img src="@/assets/images/users/avatar-8.jpg" class="me-3 rounded-circle avatar-xs flex-shrink-0"
+                        alt="user-pic" />
+                      <div class="flex-grow-1">
+                        <BLink href="#!" class="stretched-link">
+                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
+                            Maureen Gibson
+                          </h6>
+                        </BLink>
+                        <div class="fs-13 text-muted">
+                          <p class="mb-1">
+                            We talked about a project on linkedin.
+                          </p>
+                        </div>
+                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                          <span><i class="mdi mdi-clock-outline"></i> 4 hrs
+                            ago</span>
+                        </p>
+                      </div>
+                      <div class="px-2 fs-15">
+                        <input class="form-check-input" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="my-3 text-center">
+                    <BButton type="button" variant="soft-success">
+                      View All Notifications
+                      <i class="ri-arrow-right-line align-middle"></i>
+                    </BButton>
+                  </div>
+                </simplebar>
+              </BTab>
+
+              <BTab title="Messages" class="tab-pane fade py-2 ps-2" id="messages-tab" role="tabpanel"
+                aria-labelledby="messages-tab">
+                <simplebar data-simplebar style="max-height: 300px" class="pe-2">
+                  <div class="text-reset notification-item d-block dropdown-item">
+                    <div class="d-flex">
+                      <img src="@/assets/images/users/avatar-3.jpg" class="me-3 rounded-circle avatar-xs"
+                        alt="user-pic" />
+                      <div class="flex-grow-1">
+                        <BLink href="#!" class="stretched-link">
+                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
+                            James Lemire
+                          </h6>
+                        </BLink>
+                        <div class="fs-13 text-muted">
+                          <p class="mb-1">
+                            We talked about a project on linkedin.
+                          </p>
+                        </div>
+                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                          <span><i class="mdi mdi-clock-outline"></i> 30 min ago</span>
+                        </p>
+                      </div>
+                      <div class="px-2 fs-15">
+                        <input class="form-check-input" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-reset notification-item d-block dropdown-item">
+                    <div class="d-flex">
+                      <img src="@/assets/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs"
+                        alt="user-pic" />
+                      <div class="flex-grow-1">
+                        <BLink href="#!" class="stretched-link">
+                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
+                            Angela Bernier
+                          </h6>
+                        </BLink>
+                        <div class="fs-13 text-muted">
+                          <p class="mb-1">
+                            Answered to your comment on the cash flow
+                            forecast's graph 🔔.
+                          </p>
+                        </div>
+                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                          <span><i class="mdi mdi-clock-outline"></i> 2 hrs
+                            ago</span>
+                        </p>
+                      </div>
+                      <div class="px-2 fs-15">
+                        <input class="form-check-input" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-reset notification-item d-block dropdown-item">
+                    <div class="d-flex">
+                      <img src="@/assets/images/users/avatar-6.jpg" class="me-3 rounded-circle avatar-xs"
+                        alt="user-pic" />
+                      <div class="flex-grow-1">
+                        <BLink href="#!" class="stretched-link">
+                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
+                            Kenneth Brown
+                          </h6>
+                        </BLink>
+                        <div class="fs-13 text-muted">
+                          <p class="mb-1">
+                            Mentionned you in his comment on 📃 invoice
+                            #12501.
+                          </p>
+                        </div>
+                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                          <span><i class="mdi mdi-clock-outline"></i> 10 hrs
+                            ago</span>
+                        </p>
+                      </div>
+                      <div class="px-2 fs-15">
+                        <input class="form-check-input" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-reset notification-item d-block dropdown-item">
+                    <div class="d-flex">
+                      <img src="@/assets/images/users/avatar-8.jpg" class="me-3 rounded-circle avatar-xs"
+                        alt="user-pic" />
+                      <div class="flex-grow-1">
+                        <BLink href="#!" class="stretched-link">
+                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
+                            Maureen Gibson
+                          </h6>
+                        </BLink>
+                        <div class="fs-13 text-muted">
+                          <p class="mb-1">
+                            We talked about a project on linkedin.
+                          </p>
+                        </div>
+                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                          <span><i class="mdi mdi-clock-outline"></i> 3 days
+                            ago</span>
+                        </p>
+                      </div>
+                      <div class="px-2 fs-15">
+                        <input class="form-check-input" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="my-3 text-center">
+                    <BButton type="button" variant="soft-success">
+                      View All Messages
+                      <i class="ri-arrow-right-line align-middle"></i>
+                    </BButton>
+                  </div>
+                </simplebar>
+              </BTab>
+
+              <BTab title="Alerts" class="p-4">
+                <simplebar data-simplebar style="max-height: 300px" class="pe-2">
+                  <div class="w-25 w-sm-50 pt-3 mx-auto">
+                    <img src="@/assets/images/svg/bell.svg" class="img-fluid" alt="user-pic" />
+                  </div>
+                  <div class="text-center pb-5 mt-2">
+                    <h6 class="fs-18 fw-semibold lh-base">
+                      Hey! You have no any notifications
+                    </h6>
+                  </div>
+                </simplebar>
+              </BTab>
+            </BTabs>
+          </BDropdown>
+
+          <BDropdown variant="link" class="ms-sm-3 header-item topbar-user"
+            toggle-class="rounded-circle material-shadow-none" no-caret id="page-header-user-dropdown"
+            menu-class="dropdown-menu-end" :offset="{ alignmentAxis: -14, crossAxis: 0, mainAxis: 0 }" v-if="user">
+            <template #button-content>
+              <span class="d-flex align-items-center">
+
+                <img class="rounded-circle header-profile-user" :src="user.avatar" alt="Header Avatar">
+                <span class="text-start ms-xl-2">
+                  <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ user.first_name }}
+                    {{ user.last_name }}</span>
+                  <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ user.user_type }}</span>
+                </span>
+              </span>
+            </template>
+            <h6 class="dropdown-header">Welcome Anna!</h6>
+            <router-link class="dropdown-item" to="/profile"><i
+                class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i>
+              <span class="align-middle"> Profile</span>
+            </router-link>
+
+
+            <div class="dropdown-divider"></div>
+
+            <router-link class="dropdown-item" to="/profile-setting">
+              <BBadge variant="success-subtle" class="bg-success-subtle text-success mt-1 float-end">New</BBadge><i
+                class="mdi mdi-cog-outline text-muted fs-16 align-middle me-1"></i>
+              <span class="align-middle"> Settings</span>
+            </router-link>
+
+            <router-link to="/login" @click="logout" class="dropdown-item"><i
+                class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
+              <span class="align-middle" data-key="t-logout"> Logout</span>
+            </router-link>
+          </BDropdown>
+        </div>
+      </div>
+    </div>
+  </header>
+</template>

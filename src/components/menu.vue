@@ -1,11 +1,21 @@
 <script>
+
 export default {
   data() {
     return {
       settings: {
         minScrollbarLength: 60,
       },
+      
     };
+  },
+  computed: {
+    
+    layoutType: {
+      get() {
+        return 'vertical';
+      },
+    },
   },
 
   watch: {
@@ -90,7 +100,7 @@ export default {
   <BContainer fluid>
     <div id="two-column-menu"></div>
 
-    <template >
+    <template v-if="layoutType === 'vertical'">
       <ul class="navbar-nav h-100" id="navbar-nav">
         <li class="menu-title">
           <span data-key="t-menu"> {{ $t("t-menu") }}</span>
@@ -126,6 +136,16 @@ export default {
           </router-link>
 
         </li>
+
+
+
+
+
+
+
+
+
+
       </ul>
     </template>
   </BContainer>
