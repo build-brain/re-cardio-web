@@ -1,11 +1,12 @@
 <template>
-<div>
-    <NavBar />
-</div>
+  <Layout>
+    
+
+  </Layout>
 </template>
 
 <script setup>
-import NavBar from '@/components/nav-bar.vue'
+import Layout from "@/layouts/main.vue";
 </script>
 
 <style>

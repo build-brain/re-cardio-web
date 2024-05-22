@@ -241,28 +241,7 @@ export default {
     <div class="layout-width">
       <div class="navbar-header">
         <div class="d-flex">
-
-
-          <!-- LOGO -->
-          <div class="navbar-brand-box horizontal-logo">
-            <router-link to="/" class="logo logo-dark">
-              <span class="logo-sm">
-                <img src="@/assets/images/logo-sm.png" alt="" height="22" />
-              </span>
-              <span class="logo-lg">
-                <img src="@/assets/images/logo-dark.png" alt="" height="17" />
-              </span>
-            </router-link>
-
-            <router-link to="/" class="logo logo-light">
-              <span class="logo-sm">
-                <img src="@/assets/images/logo-sm.png" alt="" height="22" />
-              </span>
-              <span class="logo-lg">
-                <img src="@/assets/images/logo-light.png" alt="" height="17" />
-              </span>
-            </router-link>
-          </div>
+        
 
 
           <BButton variant="white" type="button"
