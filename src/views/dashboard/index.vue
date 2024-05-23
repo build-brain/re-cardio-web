@@ -10,6 +10,11 @@
           <BCol xl="4">
           </BCol>
         </BRow>
+        <BRow>
+          <BCol xl="12">
+            <Project/>
+          </BCol>
+        </BRow>
 
       </BCol>
       <BCol xxl="4">
@@ -27,5 +32,6 @@ import Layout from "@/layouts/main.vue";
 import pageHeader from "@/components/page-header.vue";
 import Widgets from "@/components/dashboard/Widgets.vue";
 import Schedule from "@/components/dashboard/Schedule.vue";
+import Project from "@/components/dashboard/Projects.vue";
 </script>
 
