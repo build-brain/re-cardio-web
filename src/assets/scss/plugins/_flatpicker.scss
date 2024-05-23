@@ -883,11 +883,7 @@ span.flatpickr-weekday {
 
 
 .flatpickr-calendar {
-    .flatpickr-rContainer {
-        .flatpickr-weekdays {
-            background-color: var(--#{$prefix}primary) !important;
-        }
-    }
+
 
     .flatpickr-day {
         &.selected {
