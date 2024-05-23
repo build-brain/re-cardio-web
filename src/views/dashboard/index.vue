@@ -1,15 +1,31 @@
 <template>
   <Layout>
-    <div>
-        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Animi nulla odit inventore culpa aperiam quaerat, veniam, consequatur totam doloremque explicabo ex sequi cupiditate, harum cumque suscipit tenetur in vel rerum aliquam. Iusto sint repudiandae est voluptates at quae adipisci, repellat officia obcaecati iste eos optio recusandae ex eaque, dolore veniam, explicabo incidunt non! Sit architecto enim voluptate molestias, corrupti atque, quam magni dolorum sed error minus qui eveniet nemo a nostrum officia quasi cum nulla dolore impedit quo nobis. Maiores quibusdam a sapiente quis illum cum velit, alias labore at, perspiciatis consectetur, blanditiis suscipit ipsam nam corporis ea? Aliquam, aliquid.
-    </div>
+    <pageHeader title="Projects" pageTitle="Dashboards"/>
+    <BRow class="project-wrapper">
+      <BCol xxl="8">
+        <BRow>
+          <Widgets />
+          <BCol xl="4">
+          </BCol>
+          <BCol xl="4">
+          </BCol>
+        </BRow>
+
+      </BCol>
+      <BCol xxl="4">
+        <Schedule />
+      </BCol>
+
+   
+    </BRow>
+
   </Layout>
 </template>
 
 <script setup>
 import Layout from "@/layouts/main.vue";
+import pageHeader from "@/components/page-header.vue";
+import Widgets from "@/components/dashboard/Widgets.vue";
+import Schedule from "@/components/dashboard/Schedule.vue";
 </script>
 
-<style>
-
-</style>
