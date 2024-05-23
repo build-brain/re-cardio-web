@@ -317,14 +317,12 @@ export default {
 }
 .extra-small-text {
     font-size: 0.6rem;
-    /* Или другое значение, которое вам подходит */
+   
 }
 
 .custom-text {
     color: #0c1722;
-    /* темно-синий цвет */
     font-weight: bold;
     opacity: 100;
-    /* жирный текст */
 }
 </style>

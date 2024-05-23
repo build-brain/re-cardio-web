@@ -19,8 +19,15 @@ const routes = [
     children: [
       { path: '',   component:() => import("../views/patients/index.vue"),},
       { path: 'profile/:id', component: () => import("../views/patients/profile/index.vue"), },
+      { path: 'add', component: () => import("../views/patients/add/index.vue"), }
     ], 
   },
+
+  {
+    path:"/ecr/",
+    component:() => import("../views/ecr/index.vue")
+    
+  }
 ];
 const router = createRouter({
   history: createWebHistory(),
