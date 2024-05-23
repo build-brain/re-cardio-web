@@ -1,33 +1,22 @@
 import { createI18n } from 'vue-i18n';
-import { nextTick } from 'vue';
-import ru from './lang/ru.json';
-import uz from './lang/uz.json';
 
-const i18n = createI18n({
-    legacy: false,
-    locale: 'ru',
-    fallbackLocale: 'uz',
-    messages: {
-        ru,
-        uz,
-    },
-});
+async function loadLocaleMessages() {
+  const locales = import.meta.glob('./lang/*.json'); 
+  const messages = {};
 
-export function setI18nLanguage(i18n, locale) {
-    if (i18n.mode === 'legacy') {
-        i18n.global.locale = locale;
-    } else {
-        i18n.global.locale.value = locale;
+  for (const path in locales) {
+    const matched = path.match(/([A-Za-z0-9-_]+)\./i);
+    if (matched && matched.length > 1) {
+      const locale = matched[1];
+      messages[locale] = await locales[path]().then(module => module.default);
     }
-    document.querySelector('html').setAttribute('lang', locale);
+  }
+  
+  return messages;
 }
 
-export async function loadLocaleMessages(i18n, locale) {
-    const messages = await import(
-        /* webpackChunkName: "locale-[request]" */ `./lang/${locale}.json`
-    );
-    i18n.global.setLocaleMessage(locale, messages.default);
-    return nextTick();
-}
-
-export default i18n;
+export default createI18n({
+  locale: localStorage.getItem('language') || 'ru',
+  fallbackLocale: import.meta.env.VUE_APP_I18N_FALLBACK_LOCALE || 'ru',
+  messages: await loadLocaleMessages(),
+});

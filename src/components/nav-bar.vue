@@ -4,8 +4,6 @@ import { layoutMethods } from "@/state/helpers";
 import simplebar from "simplebar-vue";
 import flag_uz from '@/assets/images/flags/uz.svg';
 import flag_ru from '@/assets/images/flags/ru.svg';
-
-
 import i18n from "../i18n";
 
 /**
@@ -162,9 +160,8 @@ export default {
 
         this.lan = savedLanguage;
         this.flag = savedFlag;
-       
-      
         i18n.global.locale = savedLanguage;
+        console.log(i18n.global.locale);
       } else {
        
         this.flag = import.meta.env.VUE_APP_I18N_LOCALE;
