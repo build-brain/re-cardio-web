@@ -1,6 +1,6 @@
 <template>
   <Layout>
-    <pageHeader title="Projects" pageTitle="Dashboards"/>
+    <pageHeader title="Статистика" pageTitle="Управление"/>
     <BRow class="project-wrapper">
       <BCol xxl="8">
         <BRow>

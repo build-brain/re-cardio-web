@@ -7,6 +7,11 @@ const routes = [
     name: "default",
     component: () => import("../views/dashboard/index.vue"),
   },
+  {
+    path:"/main-calendar/",
+    name:"main-calendar",
+    component:() => import("../views/calendar/index.vue")
+  }
 ];
 const router = createRouter({
   history: createWebHistory(),
