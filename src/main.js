@@ -10,6 +10,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue-next/dist/bootstrap-vue-next.css';
 import './assets/scss/app.scss';
 import 'bootstrap/dist/js/bootstrap.bundle';
+import "leaflet/dist/leaflet.css";
 
 
 const app = createApp(App);

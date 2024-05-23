@@ -11,7 +11,16 @@ const routes = [
     path:"/main-calendar/",
     name:"main-calendar",
     component:() => import("../views/calendar/index.vue")
-  }
+  },
+  
+  {
+    path: '/patients/',
+    meta: { title: "ProfileERC", authRequired: true },
+    children: [
+      { path: '',   component:() => import("../views/patients/index.vue"),},
+      { path: 'profile/:id', component: () => import("../views/patients/profile/index.vue"), },
+    ], 
+  },
 ];
 const router = createRouter({
   history: createWebHistory(),

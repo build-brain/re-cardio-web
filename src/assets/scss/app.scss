@@ -63,10 +63,7 @@
 // Pages
 
 @import "pages/dashboard";
-
 @import "pages/errors";
-
-
 @import "./custom.scss";
 
 
@@ -74,4 +71,5 @@
 
 @import "plugins/flatpicker.scss";
 @import "plugins/fullcalendar.scss";
+@import "plugins/leaflet-maps.scss";
 
