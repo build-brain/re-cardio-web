@@ -1,6 +1,6 @@
 <template>
     <Layout>
-        <pageHeader title="ПАЦИЕНТЫ" pageTitle="Таблица" />
+        <pageHeader title="ПАЦИЕНТЫ"  />
         <Patients/>
     </Layout>
 </template>

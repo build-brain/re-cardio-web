@@ -6,11 +6,12 @@ export default {
       settings: {
         minScrollbarLength: 60,
       },
-      
+     user: JSON.parse(localStorage.getItem('user'))
+
     };
   },
   computed: {
-    
+
     layoutType: {
       get() {
         return 'vertical';
@@ -47,6 +48,7 @@ export default {
       if (ul) {
         const items = Array.from(ul.querySelectorAll("a.nav-link"));
         let activeItems = items.filter((x) => x.classList.contains("active"));
+
         this.removeActivation(activeItems);
         let matchingMenuItem = items.find((x) => {
           return x.getAttribute("href") === pathName;
@@ -58,6 +60,7 @@ export default {
     },
     removeActivation(items) {
       items.forEach((item) => {
+        console.log(item);
         if (item) { // Проверяем, существует ли элемент
           if (item.classList.contains("menu-link")) {
             if (!item.classList.contains("active")) {
@@ -112,27 +115,44 @@ export default {
           </router-link>
         </li>
         <li class="nav-item">
-          <router-link to="/main-calendar/" class="nav-link menu-link" data-key="t-projects">
+          <router-link to="/main-calendar/" class="nav-link menu-link" data-key="t-calendar">
             <i class="ri-calendar-2-line"></i>
             <span data-key="t-calendar">{{ $t("t-calendar") }}</span>
           </router-link>
         </li>
         <li class="nav-item">
 
-
-          <router-link to="/patients/" class="nav-link custom-abc" data-key="t-patients">
+          <router-link to="/patients/" class="nav-link menu-link" data-key="t-patients">
             <i class="ri-account-circle-line"></i>
-          
-            <span data-key="t-patients">  {{ $t("t-patient") }}</span>
+
+            <span data-key="t-patients"> {{ $t("t-patient") }}</span>
           </router-link>
 
         </li>
         <li class="nav-item">
 
-          <router-link to="/ecr/" class="nav-link custom-abc" data-key="t-ecr">
+          <router-link to="/ecr/" class="nav-link menu-link" data-key="t-ecr">
             <i class="ri-clipboard-fill"></i>
-          
-            <span data-key="t-ecr">    {{ $t("t-ecr") }}</span>
+
+            <span data-key="t-ecr"> {{ $t("t-ecr") }}</span>
+          </router-link>
+
+        </li>
+        <li class="nav-item">
+
+          <router-link to="/archive-ecr/" class="nav-link menu-link" data-key="t-ecr">
+            <i class="ri-inbox-archive-fill"></i>
+
+            <span data-key="t-ecr"> {{ $t("t-archive-ecr") }}</span>
+          </router-link>
+
+        </li>
+        <li class="nav-item" v-if="user.user_type === 'ADMIN'">
+
+          <router-link to="/employee/" class="nav-link menu-link" data-key="t-ecr">
+            <i class="ri-team-fill"></i>
+
+            <span data-key="t-ecr"> Персонал</span>
           </router-link>
 
         </li>
@@ -150,3 +170,10 @@ export default {
     </template>
   </BContainer>
 </template>
+
+<style scoped>
+.router-link-active {
+  color: #fff !important;
+
+}
+</style>

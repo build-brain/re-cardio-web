@@ -1,22 +1,24 @@
-import { createI18n } from 'vue-i18n';
+import { createI18n } from "vue-i18n";
+import store from './state/store'; // импортируйте ваш Vuex store
 
-async function loadLocaleMessages() {
-  const locales = import.meta.glob('./lang/*.json'); 
-  const messages = {};
+import ru from "./lang/ru.json";
+import uz from "./lang/uz.json";
 
-  for (const path in locales) {
-    const matched = path.match(/([A-Za-z0-9-_]+)\./i);
-    if (matched && matched.length > 1) {
-      const locale = matched[1];
-      messages[locale] = await locales[path]().then(module => module.default);
-    }
-  }
-  
-  return messages;
-}
-
-export default createI18n({
-  locale: localStorage.getItem('language') || 'ru',
-  fallbackLocale: import.meta.env.VUE_APP_I18N_FALLBACK_LOCALE || 'ru',
-  messages: await loadLocaleMessages(),
+const i18n = createI18n({
+  locale: store.state.lang.locale,
+  fallbackLocale: "ru",
+  messages: { ru, uz },
+  legacy: true,
 });
+
+store.watch(
+  (state) => state.lang.locale,
+  (newLocale) => {
+    store.dispatch('lang/setLocale', newLocale);
+  
+    i18n.global.locale = newLocale;
+    console.log(i18n.global.locale);
+  }
+);
+
+export default i18n;

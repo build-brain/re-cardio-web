@@ -1,291 +1,231 @@
-<script>
-import { CountTo } from "vue3-count-to";
-import { layoutComputed } from "@/state/helpers.js";
-import getChartColorsArray from "@/common/getChartColorsArray";
-export default {
-  components: {
-    CountTo
-  },
-  data() {
-    return {
-      series: [{
-        name: "Number of Projects",
-        type: "bar",
-        data: [34, 65, 46, 68, 49, 61, 42, 44, 78, 52, 63, 67],
-      },
-      {
-        name: "Revenue",
-        type: "area",
-        data: [
-          89.25, 98.58, 68.74, 108.87, 77.54, 84.03, 51.24, 28.57, 92.57,
-          42.36, 88.51, 36.57,
-        ],
-      },
-      {
-        name: "Active Projects",
-        type: "bar",
-        data: [8, 12, 7, 17, 21, 11, 5, 9, 7, 29, 12, 35],
-      },
-      ],
-      chartOptions: {
-        chart: {
-          height: 374,
-          type: "line",
-          toolbar: {
-            show: false,
-          },
-        },
-        stroke: {
-          curve: "smooth",
-          dashArray: [0, 3, 0],
-          width: [0, 1, 0],
-        },
-        fill: {
-          opacity: [1, 0.1, 1],
-        },
-        markers: {
-          size: [0, 4, 0],
-          strokeWidth: 2,
-          hover: {
-            size: 4,
-          },
-        },
-        xaxis: {
-          categories: [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-          ],
-          axisTicks: {
-            show: false,
-          },
-          axisBorder: {
-            show: false,
-          },
-        },
-        grid: {
-          show: true,
-          xaxis: {
-            lines: {
-              show: true,
-            },
-          },
-          yaxis: {
-            lines: {
-              show: false,
-            },
-          },
-          padding: {
-            top: 0,
-            right: -2,
-            bottom: 15,
-            left: 10,
-          },
-        },
-        legend: {
-          show: true,
-          horizontalAlign: "center",
-          offsetX: 0,
-          offsetY: -5,
-          markers: {
-            width: 9,
-            height: 9,
-            radius: 6,
-          },
-          itemMargin: {
-            horizontal: 10,
-            vertical: 0,
-          },
-        },
-        plotOptions: {
-          bar: {
-            columnWidth: "30%",
-            barHeight: "70%",
-          },
-        },
-        tooltip: {
-          shared: true,
-          y: [{
-            formatter: function (y) {
-              if (typeof y !== "undefined") {
-                return y.toFixed(0);
-              }
-              return y;
-            },
-          },
-          {
-            formatter: function (y) {
-              if (typeof y !== "undefined") {
-                return "$" + y.toFixed(2) + "k";
-              }
-              return y;
-            },
-          },
-          {
-            formatter: function (y) {
-              if (typeof y !== "undefined") {
-                return y.toFixed(0);
-              }
-              return y;
-            },
-          },
-          ],
-        },
-      },
-    };
-  },
-  computed: {
-    ...layoutComputed,
-    layoutTheme() {
-      return this.$store ? this.$store.state.layout.layoutTheme : {} || {};
-    }
-  },
-  methods: {
-    handleUpdate() {
-      setTimeout(() => {
-        switch (this.layoutTheme) {
-          case "default":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-warning", "--vz-success"]')
-            };
-            break;
-          case "saas":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-warning", "--vz-success"]')
-            };
-            break;
-          case "corporate":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-secondary", "--vz-danger"]')
-            };
-            break;
-          case "galaxy":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-primary-rgb, 0.1", "--vz-primary-rgb, 0.50"]')
-            };
-            break;
-          case "material":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-warning", "--vz-success"]')
-            };
-            break;
-          case "creative":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-secondary", "--vz-warning", "--vz-success"]')
-            };
-            break;
-          case "minimal":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-primary-rgb, 0.1", "--vz-primary-rgb, 0.50"]')
-            };
-            break;
-          case "modern":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-warning", "--vz-success"]')
-            };
-            break;
-          case "interactive":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-info", "--vz-warning"]')
-            };
-            break;
-          case "classic":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-secondary", "--vz-warning"]')
-            };
-            break;
-          case "vintage":
-            this.chartOptions = {
-              ...this.chartOptions,
-              colors: getChartColorsArray('["--vz-primary", "--vz-warning", "--vz-success"]')
-            };
-            break;
-        }
-      }, 200)
-    },
-  },
-  mounted() {
-    this.handleUpdate();
-  },
-  watch: {
-    layoutTheme() {
-      this.handleUpdate();
-    }
-  },
-};
-</script>
-
 <template>
   <BCard no-body>
-    <BCardHeader class="border-0 align-items-center d-flex">
-      <BCardTitle class="mb-0 flex-grow-1">Статистика Клиентов</BCardTitle>
-      <div class="hstack gap-1">
-        <BButton type="button" variant="soft-secondary" size="sm" class="material-shadow-none">ALL</BButton>
-        <BButton type="button" variant="soft-secondary" size="sm" class="material-shadow-none">1M</BButton>
-        <BButton type="button" variant="soft-secondary" size="sm" class="material-shadow-none">6M</BButton>
-        <BButton type="button" variant="soft-primary" size="sm" class="material-shadow-none">1Y</BButton>
-      </div>
-    </BCardHeader>
-
-    <BCardHeader class="p-0 border-0 bg-light-subtle">
-      <BRow class="g-0 text-center">
-        <BCol cols="6" sm="3">
-          <div class="p-3 border border-dashed border-start-0">
-            <h5 class="mb-1">
-              <count-to :duration="1000" :startVal='0' :endVal="9851"></count-to>
-            </h5>
-            <p class="text-muted mb-0">Number of Projects</p>
-          </div>
-        </BCol>
-        <BCol cols="6" sm="3">
-          <div class="p-3 border border-dashed border-start-0">
-            <h5 class="mb-1">
-              <count-to :duration="1000" :startVal='0' :endVal="1026"></count-to>
-            </h5>
-            <p class="text-muted mb-0">Active Projects</p>
-          </div>
-        </BCol>
-        <BCol cols="6" sm="3">
-          <div class="p-3 border border-dashed border-start-0">
-            <h5 class="mb-1">
-              $<count-to :duration="1000" :startVal='0' :endVal="228"></count-to>k
-            </h5>
-            <p class="text-muted mb-0">Revenue</p>
-          </div>
-        </BCol>
-        <BCol cols="6" sm="3">
-          <div class="p-3 border border-dashed border-start-0 border-end-0">
-            <h5 class="mb-1 text-success">
-              <count-to :duration="1000" :startVal='0' :endVal="10589"></count-to>h
-            </h5>
-            <p class="text-muted mb-0">Working Hours</p>
-          </div>
-        </BCol>
-      </BRow>
-    </BCardHeader>
     <BCardBody class="p-0 pb-2">
       <div>
-        <apexchart class="apex-charts" height="374" dir="ltr" :series="series" :options="chartOptions"></apexchart>
+        <p class="fw-bold p-2 fs-3">Госпитализация пациентов с ИМ</p>
+        <apexchart type="line" height="490" :options="chartOptions" :series="series"></apexchart>
+      </div>
+    </BCardBody>
+  </BCard>
+  <BCard no-body>
+    <BCardBody class="p-0 pb-2">
+      <div>
+        <p class="fw-bold p-2 fs-3">Распределение пациентов по областям</p>
+        <apexchart  height="490" :options="chartOptions2" :series="series2"></apexchart>
       </div>
     </BCardBody>
   </BCard>
 </template>
+
+
+
+<script setup>
+import { ref, computed, reactive, watchEffect } from 'vue';
+import { useStore } from 'vuex';
+
+const store = useStore();
+const admissionsOverTime = computed(() => store.getters['dashboard/patientAdmissionOverTime']);
+const series = ref([]);
+const chartOptions = reactive({
+  chart: {
+    height: 350,
+    type: 'line',
+    stacked: false,
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  stroke: {
+    width: [0, 2, 2],
+    curve: 'smooth',
+  },
+  fill: {
+    type: ['gradient', 'solid', 'solid'],
+    gradient: {
+      shade: 'light',
+      type: 'vertical',
+      shadeIntensity: 0.5,
+      opacityFrom: 0.8,
+      opacityTo: 0.2,
+      stops: [0, 100]
+    },
+    colors: ['#D3D3D3', '#007bff', '#fd7e14']
+  },
+  markers: {
+    size: 5,
+    colors: ['#D3D3D3', '#007bff', '#fd7e14'],
+    strokeWidth: 2,
+  },
+  xaxis: {
+    categories: [], // Обновляем категории внутри watchEffect
+  },
+  yaxis: [
+    {
+      axisTicks: { show: true },
+      axisBorder: { show: true, color: '#008FFB' },
+      labels: { style: { colors: '#008FFB' } },
+      title: { text: 'Возраст', style: { color: '#008FFB' } },
+    },
+    {
+      opposite: true,
+      axisTicks: { show: true },
+      axisBorder: { show: true, color: '#263238' },
+      labels: { style: { colors: '#263238' } },
+      title: { text: 'Количество', style: { color: '#263238' } },
+    },
+  ],
+  tooltip: { shared: true },
+  legend: { horizontalAlign: 'left', offsetX: 40 },
+});
+
+watchEffect(() => {
+  try {
+    const admissions = admissionsOverTime.value;
+    if (!admissions || !Array.isArray(admissions)) {
+      throw new Error('Invalid data for admissionsOverTime');
+    }
+
+    // Извлекаем уникальные месяцы
+    const months = [...new Set(admissions.map(item => item.month_name))];
+    const monthNames = {
+      'January': 'Январь',
+      'February': 'Февраль',
+      'March': 'Март',
+      'April': 'Апрель',
+      'May': 'Май',
+      'June': 'Июнь',
+      'July': 'Июль',
+      'August': 'Август',
+      'September': 'Сентябрь',
+      'October': 'Октябрь',
+      'November': 'Ноябрь',
+      'December': 'Декабрь'
+    };
+
+    // Группируем данные по месяцу и полу
+    const groupedData = admissions.reduce((acc, item) => {
+      const key = `${item.month_name}-${item.er_card__patient__gender}`;
+      acc[key] = (acc[key] || 0) + item.count;
+      return acc;
+    }, {});
+
+
+    // Формируем данные для графика
+    const maleSeriesData = months.map(month => ({
+      x: monthNames[month],
+      y: groupedData[`${month}-male`] || 0
+    }));
+
+    const femaleSeriesData = months.map(month => ({
+      x: monthNames[month],
+      y: groupedData[`${month}-female`] || 0
+    }));
+
+    const avgAgeSeriesData = months.map(month => {
+      const avgAgeItem = admissions.find(item => item.month_name === month);
+      return {
+        x: monthNames[month],
+        y: avgAgeItem ? avgAgeItem.avg_age : 0
+      };
+    });
+
+    series.value = [
+      {
+        name: 'Женщины',
+        type: 'line',
+        data: femaleSeriesData,
+      },
+      {
+        name: 'Мужчины',
+        type: 'line',
+        data: maleSeriesData
+      },
+      {
+        name: 'Ср. возраст',
+        type: 'area',
+        data: avgAgeSeriesData
+      }
+    ];
+
+
+
+  } catch (error) {
+    console.error('Error in watchEffect:', error);
+  }
+});
+
+const patientDistribution = computed(() => store.getters['dashboard/patientDistribution']);
+const series2 = ref([]);
+const chartOptions2 = reactive({
+      chart: {
+        type: 'bar',
+        height: 350,
+      },
+      colors: ['#FFC107', '#0D6EFD'],
+      plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '10%',
+            endingShape: 'rounded'
+          },
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          show: true,
+          width: 2,
+          colors: ['transparent']
+        },
+      xaxis: {
+    
+        title: {
+          text: 'Регион',
+        },
+        tickPlacement: 'on',
+      },
+      yaxis: {
+        title: {
+          text: 'Количество',
+        },
+      },
+      fill: {
+        opacity: 1,
+      },
+      legend: {
+        position: 'bottom',
+      },
+     
+    });
+
+    watchEffect(() => {
+    const male = patientDistribution.value
+        .filter(item => item?.patient__gender === 'male' && item?.patient__region__name && item?.count)
+        .map(item => ({
+            x: item.patient__region__name,
+            y: item.count
+        }));
+
+    const female = patientDistribution.value
+        .filter(item => item?.patient__gender === 'female' && item?.patient__region__name && item?.count)
+        .map(item => ({
+            x: item.patient__region__name,
+            y: item.count
+        }));
+
+    series2.value = [
+        {
+            name: 'Мужчины',
+            data: male,
+        },
+        {
+            name: 'Женщины',
+            data: female
+        }
+    ];
+});
+
+
+
+
+</script>

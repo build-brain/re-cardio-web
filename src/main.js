@@ -1,6 +1,9 @@
 import { createApp } from 'vue';
 import router from './router/index';
 import store from './state/store';
+import { setupFlatpickr } from "./flatpickr";
+import Multiselect from '@vueform/multiselect';
+import '@vueform/multiselect/themes/default.css';
 
 import App from './App.vue';
 import { createBootstrap } from 'bootstrap-vue-next';
@@ -14,6 +17,14 @@ import "leaflet/dist/leaflet.css";
 
 
 const app = createApp(App);
+setupFlatpickr(store.state.lang.locale);
+
+store.watch(
+  (state) => state.lang.locale,
+  (newLocale) => {
+    setupFlatpickr(newLocale);
+  }
+);
 
 app
   .use(router)
@@ -21,5 +32,5 @@ app
   .use(VueApexCharts)
   .use(store)
   .use(createBootstrap())
+  .component('Multiselect', Multiselect)  // Передаем имя компонента и сам компонент
   .mount('#app');
-  

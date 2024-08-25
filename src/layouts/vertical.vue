@@ -1,7 +1,7 @@
 <script>
 import router from "@/router";
 import simplebar from "simplebar-vue";
-import { layoutComputed } from "@/state/helpers";
+import { layoutComputed, layoutMethods } from "@/state/helpers";
 
 import NavBar from "@/components/nav-bar.vue";
 import Menu from "@/components/menu.vue";
@@ -29,19 +29,20 @@ export default {
     // this.updateSidebarSize();
   },
   methods: {
+    ...layoutMethods,
     updateSidebarSize() {
-      let sidebarSize = ''
-      // Check window.screen.width and update the data-sidebar-size attribute
-      if (window.innerWidth < 1025) {
-        this.sidebarSize = "sm";
-        sidebarSize = 'sm'
-      } else {
-        this.sidebarSize = "lg"; // Reset sidebarSize if screen width is >= 1025
-        sidebarSize = 'lg'
-      }
-      // Update the data-sidebar-size attribute of document.documentElement
-      document.documentElement.setAttribute("data-sidebar-size", sidebarSize);
-    },
+    let sidebarSize = ''
+    // Check window.screen.width and update the data-sidebar-size attribute
+    if (window.innerWidth < 1025) {
+      this.changeSidebarSize({ sidebarSize: "sm" });
+      sidebarSize = 'sm'
+    } else {
+      this.changeSidebarSize({ sidebarSize: "lg" }); // Reset sidebarSize if screen width is >= 1025
+      sidebarSize = 'lg'
+    }
+    // Update the data-sidebar-size attribute of document.documentElement
+    document.documentElement.setAttribute("data-sidebar-size", sidebarSize);
+  },
 
     initActiveMenu() {
       if (document.documentElement.getAttribute('data-sidebar-size') === 'sm-hover') {
@@ -121,7 +122,7 @@ export default {
               <img src="@/assets/images/HEART.svg" alt="" height="22" />
             </span>
             <span class="logo-lg">
-              <img src="@/assets/images/cardio_plus_logo.svg" alt="" height="17" />
+              <img src="@/assets/images/svg/RE.CARDIO.svg" alt="" height="17" />
             </span>
           </router-link>
           <!-- Light Logo-->
@@ -130,7 +131,7 @@ export default {
               <img src="@/assets/images/HEART.svg" alt="" height="22" />
             </span>
             <span class="logo-lg">
-              <img src="@/assets/images/cardio_plus_logo.svg" alt="" height="17" />
+              <img src="@/assets/images/svg/RE.CARDIO.svg" alt="" height="17" />
             </span>
           </router-link>
           <BButton size="sm" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
@@ -138,9 +139,6 @@ export default {
             <i class="ri-record-circle-line"></i>
           </BButton>
         </div>
-
-      
-
         <simplebar id="scrollbar" class="h-100" ref="scrollbar">
           <Menu></Menu>
         </simplebar>

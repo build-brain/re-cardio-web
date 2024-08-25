@@ -1,91 +1,115 @@
 <script setup>
-import { BriefcaseIcon, AwardIcon, ClockIcon } from '@zhuowenli/vue-feather-icons';
-import { ref } from "vue";
+import { useStore } from 'vuex';
+import { computed, ref } from 'vue';
 
-const projectsWidgets = ref([
-    {
-        id: 1,
-        feaIcon: "briefcase",
-        feaIconClass: "primary",
-        label: "Активные Проекты",
-        counter: "825",
-        suffix: "",
-        badgeClass: "danger",
-        icon: "ri-arrow-down-s-line",
-        percentage: "5.02 %",
-        caption: "Проекты в этом месяце",
-    },
-    {
-        id: 2,
-        feaIcon: "award",
-        feaIconClass: "warning",
-        label: "Новые лиды",
-        counter: "7522",
-        separator: ",",
-        suffix: "",
-        badgeClass: "success",
-        icon: "ri-arrow-up-s-line",
-        percentage: "3.58 %",
-        caption: "Лиды в этом месяце",
-    },
-    {
-        id: 3,
-        feaIcon: "clock",
-        feaIconClass: "info",
-        label: "Количества Часов",
-        counter: "168h 40m",
-        suffix: "m",
-        badgeClass: "danger",
-        icon: "ri-arrow-down-s-line",
-        percentage: "10.35 %",
-        caption: "Работа в этом месяце",
-    },
-])
+const store = useStore();
+const stat = computed(() => store.getters['dashboard/currenrstat']);
+
+const outcomes = computed(() => stat.value?.outcomes || {
+    positive: 0,
+    rehospitalization: 0,
+    lethal: 0
+});
+const getCountByClassAndGender = (severityClass, gender) => {
+    if (!stat.value || !stat.value.severity_class_distribution) {
+        return 0;
+    }
+
+    const item = stat.value.severity_class_distribution.find(
+        item => item.ca_sheet__patient_severity_class === severityClass && item.patient__gender === gender
+    );
+    return item ? item.count : 0;
+};
 
 </script>
 
 <template>
-    <BCol xl="4" v-for="(item, index) of projectsWidgets" :key="index">
+    <BCol xl="4">
         <BCard no-body class="card-animate">
             <BCardBody>
-                <div class="d-flex align-items-center">
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title rounded-2 fs-2" :class="{
-        'bg-primary-subtle text-primary': item.feaIconClass === 'primary',
-        'bg-warning-subtle text-warning': item.feaIconClass === 'warning',
-        'bg-info-subtle text-info': item.feaIconClass === 'info'
-    }">
-                            <template v-if="item.feaIcon == 'briefcase'">
-                                <BriefcaseIcon size="24" class="text-primary"></BriefcaseIcon>
-                            </template>
-
-                            <template v-if="item.feaIcon == 'award'">
-                                <AwardIcon size="24" class="text-warning"></AwardIcon>
-                            </template>
-
-                            <template v-if="item.feaIcon == 'clock'">
-                                <ClockIcon size="24" class="text-info"></ClockIcon>
-                            </template>
-                        </span>
+                <p class="text-muted text-uppercase fs-5 fw-bold">Активные ЭКР</p>
+                <div class="d-flex align-items-center mb-3">
+                    <div
+                        class="bg-primary-subtle me-3 px-3 py-2 rounded-1 text-primary d-flex align-items-center justify-content-center">
+                        <i class="ri-hospital-fill fs-3"></i>
                     </div>
-                    <div class="flex-grow-1 overflow-hidden ms-3">
-                        <p class="text-uppercase fw-medium text-muted text-truncate mb-3">
-                            {{ item.label }}
-                        </p>
-                        <div class="d-flex align-items-center mb-3">
-                            <h4 class="fs-4 flex-grow-1 mb-0">
-                                <span class="counter-value">{{
-        item.counter
-    }}</span>
-                            </h4>
-                            <span
-                                :class="{ 'badge bg-danger-subtle text-danger fs-12': item.icon == 'ri-arrow-down-s-line', 'badge bg-success-subtle text-success fs-12': item.icon == 'ri-arrow-up-s-line' }"><i
-                                    :class="`${item.icon} fs-13 align-middle me-1`"></i>{{ item.percentage }}</span>
+                    <span class="fs-3 fw-bold">{{ stat.active_ercard_count }}</span>
+                </div>
+                <div class="container p-0">
+                    <div class="row text-center my-2">
+
+                        <div class="col text-primary">К / Т</div>
+                        <div class="col text-primary">I</div>
+                        <div class="col text-primary">II</div>
+                        <div class="col text-primary">III</div>
+                        <div class="col text-primary">IV</div>
+                    </div>
+
+                    <div v-for="gender in ['female', 'male']" :key="gender" class="row text-center my-2">
+                        <div class="col">{{ gender === 'female' ? 'Жен.' : 'Муж.' }}</div>
+                        <div v-for="severityClass in [1, 2, 3, 4]" :key="severityClass" class="col">
+                            {{ getCountByClassAndGender(severityClass, gender) }}
                         </div>
-                        <p class="text-muted text-truncate mb-0">{{ item.caption }}</p>
                     </div>
+
+
+
                 </div>
             </BCardBody>
         </BCard>
+
+
+
     </BCol>
+    <BCol xl="8">
+        <BCard no-body class="card-animate">
+            <BCardBody>
+                <p class="text-muted text-uppercase fs-5 fw-bold">Архивные ЭКР</p>
+
+                <div class="d-flex align-items-center mb-2">
+                    <div
+                        class="bg-warning-subtle me-3 px-3 py-2 rounded-1 text-warning d-flex align-items-center justify-content-center">
+                        <i class="ri-award-fill fs-3"></i>
+                    </div>
+                    <span class="fs-3 fw-bold">{{ stat.archived_ercard_count }}</span>
+                </div>
+                <div class="container d-grid p-0">
+                    <div class="row">
+                        <div class="col col-4 text-center">
+                            <div class="p-3 bg-success rounded-1 text-white">
+                                Положительный исход
+                            </div>
+                            <div class="fs-3 fw-bold" >
+                                {{ outcomes.positive }}
+                            </div>
+                        </div>
+
+                        <div class="col col-4 text-center">
+                            <div class="p-3 bg-warning-subtle  rounded-1  text-warning">
+                                Повторная госпитализация
+                            </div>
+                            <div class="fs-3 fw-bold">
+                                {{ outcomes.rehospitalization }}
+                            </div>
+                        </div>
+
+                        <div class="col col-4 text-center">
+                            <div class="p-3 bg-danger  rounded-1 text-white">
+                                Летальный исход
+                            </div>
+                            <div class="fs-3 fw-bold">
+                                {{ outcomes.lethal }}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </BCardBody>
+        </BCard>
+
+    </BCol>
+
+
 </template>
+
+<style scoped></style>

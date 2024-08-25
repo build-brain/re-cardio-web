@@ -29,11 +29,11 @@
     td {
 
         &:first-child{
-            padding-left: 16px;
+            padding-left: 26px;
         }
 
         &:last-child{
-            padding-right: 16px;
+            padding-right: 26px;
         }
     }
 
@@ -76,17 +76,18 @@
     }
     .sort {
         position: relative;
+        padding-left: 2rem;
         &::before {
             content: "\f035d";
             position: absolute;
-            right: 0.5rem;
+            left: 0.5rem;
             top: 18px;
             font-size: 0.8rem;
             font-family: "Material Design Icons";
         }
         &::after {
             position:absolute;
-            right: 0.5rem;
+            left: 0.5rem;
             content: "\f0360";
             font-family: "Material Design Icons";
             font-size: 0.8rem;

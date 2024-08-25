@@ -1,9 +1,12 @@
 <script>
 import { layoutMethods } from "@/state/helpers";
 
+import { mapMutations } from 'vuex';
+import { setupFlatpickr } from "../flatpickr";
+
 import simplebar from "simplebar-vue";
-import flag_uz from '@/assets/images/flags/uz.svg';
-import flag_ru from '@/assets/images/flags/ru.svg';
+import ru from "@/assets/images/flags/russia.svg";
+import uz from "@/assets/images/flags/uz.svg";
 import i18n from "../i18n";
 
 /**
@@ -14,19 +17,19 @@ export default {
     return {
       user: null,
       languages: [{
-        flag: flag_uz,
+        flag: uz,
         language: "uz",
         title: "o'zbekcha",
       },
       {
-        flag: flag_ru,
+        flag: ru,
         language: "ru",
         title: "русский",
       },
 
       ],
 
-      lan: i18n.locale,
+      lan: i18n.global.locale,
       text: null,
       flag: null,
       value: null,
@@ -39,6 +42,9 @@ export default {
 
   methods: {
     ...layoutMethods,
+
+    ...mapMutations("lang", ["setLocale"]),
+
 
 
 
@@ -81,42 +87,17 @@ export default {
     toggleRightSidebar() {
       this.$parent.toggleRightSidebar();
     },
-    initFullScreen() {
-      document.body.classList.toggle("fullscreen-enable");
-      if (
-        !document.fullscreenElement &&
-        /* alternative standard method */
-        !document.mozFullScreenElement &&
-        !document.webkitFullscreenElement
-      ) {
-        // current working methods
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) {
-          document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-          document.documentElement.webkitRequestFullscreen(
-            Element.ALLOW_KEYBOARD_INPUT
-          );
-        }
-      } else {
-        if (document.cancelFullScreen) {
-          document.cancelFullScreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitCancelFullScreen) {
-          document.webkitCancelFullScreen();
-        }
+
+    setLanguage(locale) {
+      const selectedLanguage = this.languages.find(lang => lang.language === locale);
+      if (selectedLanguage) {
+        i18n.global.locale = locale; // Устанавливаем язык для i18n
+        localStorage.setItem('language', locale);
+        localStorage.setItem('flag', selectedLanguage.flag);
+        this.lan = locale;
+        this.flag = selectedLanguage.flag;
+        document.getElementById('header-lang-img').setAttribute('src', selectedLanguage.flag);
       }
-    },
-    setLanguage(locale, country, flag) {
-      localStorage.setItem('language', locale);
-      localStorage.setItem('flag', flag)
-      this.lan = locale;
-      this.text = country;
-      this.flag = flag;
-      document.getElementById("header-lang-img").setAttribute("src", flag);
-      i18n.global.locale = locale;
     },
     toggleDarkMode() {
       const currentTheme = document.documentElement.getAttribute("data-bs-theme");
@@ -127,14 +108,6 @@ export default {
       localStorage.setItem("theme", newTheme);
     },
 
-    initTheme() {
-      // Получаем сохраненную тему из локального хранилища
-      const savedTheme = localStorage.getItem("theme");
-      // Если есть сохраненная тема, применяем её
-      if (savedTheme) {
-        document.documentElement.setAttribute("data-bs-theme", savedTheme);
-      }
-    },
     logout() {
       localStorage.clear();
 
@@ -146,52 +119,47 @@ export default {
       return this.cartItems.reduce((total, item) => total + parseFloat(item.itemPrice), 0).toFixed(2);
     },
     userFromLocalStorage() {
-        const storedUser = localStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : null
+      const storedUser = localStorage.getItem('user');
+      return storedUser ? JSON.parse(storedUser) : null
     },
   },
 
 
-    mounted() {
-      this.user = this.userFromLocalStorage;
-      const savedLanguage = localStorage.getItem('language');
-      const savedFlag = localStorage.getItem('flag');
-      if (savedLanguage && savedFlag) {
+  mounted() {
+    this.user = this.userFromLocalStorage;
 
-        this.lan = savedLanguage;
-        this.flag = savedFlag;
-        i18n.global.locale = savedLanguage;
-        console.log(i18n.global.locale);
-      } else {
-       
-        this.flag = import.meta.env.VUE_APP_I18N_LOCALE;
-        this.languages.forEach((item) => {
-          if (item.language == this.flag) {
-            document.getElementById("header-lang-img").setAttribute("src", item.flag);
-          }
-        });
+    const savedLanguage = localStorage.getItem('language');
+    const savedFlag = localStorage.getItem('flag');
+    if (savedLanguage && savedFlag) {
+      this.lan = savedLanguage;
+      this.flag = savedFlag;
+      document.getElementById('header-lang-img').setAttribute('src', savedFlag);
+      i18n.global.locale = savedLanguage;
+    } else {
+      const defaultLanguage = this.languages.find(lang => lang.language === i18n.global.locale);
+      if (defaultLanguage) {
+        this.flag = defaultLanguage.flag;
+        document.getElementById('header-lang-img').setAttribute('src', defaultLanguage.flag);
       }
-
-      document.addEventListener("scroll", function () {
-        var pageTopbar = document.getElementById("page-topbar");
-        if (pageTopbar) {
-          document.body.scrollTop >= 50 || document.documentElement.scrollTop >= 50 ? pageTopbar.classList.add(
-            "topbar-shadow") : pageTopbar.classList.remove("topbar-shadow");
-        }
-      });
-      if (document.getElementById("topnav-hamburger-icon"))
-        document
-          .getElementById("topnav-hamburger-icon")
-          .addEventListener("click", this.toggleHamburgerMenu);
-
-  
-    },
-    created() {
-      this.initTheme();
-    },
+    }
 
 
-  }
+    document.addEventListener("scroll", function () {
+      var pageTopbar = document.getElementById("page-topbar");
+      if (pageTopbar) {
+        document.body.scrollTop >= 50 || document.documentElement.scrollTop >= 50 ? pageTopbar.classList.add(
+          "topbar-shadow") : pageTopbar.classList.remove("topbar-shadow");
+      }
+    });
+    if (document.getElementById("topnav-hamburger-icon"))
+      document
+        .getElementById("topnav-hamburger-icon")
+        .addEventListener("click", this.toggleHamburgerMenu);
+
+
+  },
+
+}
 </script>
 
 <template>
@@ -208,7 +176,7 @@ export default {
                 <img src="@/assets/images/logo-sm.png" alt="" height="22" />
               </span>
               <span class="logo-lg">
-                <img src="@/assets/images/cardio_plus_logo.svg" alt="" height="17" />
+                <img src="@/assets/images/logo-dark.png" alt="" height="17" />
               </span>
             </router-link>
 
@@ -217,7 +185,7 @@ export default {
                 <img src="@/assets/images/logo-sm.png" alt="" height="22" />
               </span>
               <span class="logo-lg">
-                <img src="@/assets/images/cardio_plus_logo.svg" alt="" height="17" />
+                <img src="@/assets/images/logo-light.png" alt="" height="17" />
               </span>
             </router-link>
           </div>
@@ -234,118 +202,18 @@ export default {
           </BButton>
 
           <!-- App Search-->
-          <form class="app-search d-none d-md-block">
-            <div class="position-relative">
-              <input type="text" class="form-control" placeholder="Search..." autocomplete="off" id="search-options"
-                value="" />
-              <span class="mdi mdi-magnify search-widget-icon"></span>
-              <span class="mdi mdi-close-circle search-widget-icon search-widget-icon-close d-none"
-                id="search-close-options"></span>
-            </div>
-            <div class="dropdown-menu dropdown-menu-lg" id="search-dropdown">
-              <simplebar data-simplebar style="max-height: 320px">
-                <div class="dropdown-header">
-                  <h6 class="text-overflow text-muted mb-0 text-uppercase">
-                    Recent Searches
-                  </h6>
-                </div>
 
-
-                <div class="dropdown-item bg-transparent text-wrap">
-                  <router-link to="/" class="btn btn-soft-secondary btn-sm rounded-pill">how to setup <i
-                      class="mdi mdi-magnify ms-1"></i></router-link>
-                  <router-link to="/" class="btn btn-soft-secondary btn-sm rounded-pill">buttons <i
-                      class="mdi mdi-magnify ms-1"></i></router-link>
-                </div>
-                <div class="dropdown-header mt-2">
-                  <h6 class="text-overflow text-muted mb-1 text-uppercase">
-                    Pages
-                  </h6>
-                </div>
-
-                <BLink href="javascript:void(0);" class="dropdown-item notify-item">
-                  <i class=" ri-bubble-chart-line align-middle fs-18 text-muted me-2"></i>
-                  <span>Analytics Dashboard</span>
-                </BLink>
-
-                <BLink href="javascript:void(0);" class="dropdown-item notify-item">
-                  <i class="ri-lifebuoy-line align-middle fs-18 text-muted me-2"></i>
-                  <span>Help Center</span>
-                </BLink>
-
-                <BLink href="javascript:void(0);" class="dropdown-item notify-item">
-                  <i class=" ri-user-settings-line align-middle fs-18 text-muted me-2"></i>
-                  <span>My account settings</span>
-                </BLink>
-
-                <div class="dropdown-header mt-2">
-                  <h6 class="text-overflow text-muted mb-2 text-uppercase">
-                    Members
-                  </h6>
-                </div>
-
-                <div class="notification-list">
-                  <BLink href="javascript:void(0);" class="d-flex dropdown-item notify-item py-2">
-                    <img src="@/assets/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs"
-                      alt="user-pic" />
-                    <div class="flex-grow-1">
-                      <h6 class="m-0">Angela Bernier</h6>
-                      <span class="fs-11 mb-0 text-muted">Manager</span>
-                    </div>
-                  </BLink>
-                  <BLink href="javascript:void(0);" class="d-flex dropdown-item notify-item py-2">
-                    <img src="@/assets/images/users/avatar-3.jpg" class="me-3 rounded-circle avatar-xs"
-                      alt="user-pic" />
-                    <div class="flex-grow-1">
-                      <h6 class="m-0">David Grasso</h6>
-                      <span class="fs-11 mb-0 text-muted">Web Designer</span>
-                    </div>
-                  </BLink>
-                  <BLink href="javascript:void(0);" class="d-flex dropdown-item notify-item py-2">
-                    <img src="@/assets/images/users/avatar-5.jpg" class="me-3 rounded-circle avatar-xs"
-                      alt="user-pic" />
-                    <div class="flex-grow-1">
-                      <h6 class="m-0">Mike Bunch</h6>
-                      <span class="fs-11 mb-0 text-muted">React Developer</span>
-                    </div>
-                  </BLink>
-                </div>
-              </simplebar>
-
-
-            </div>
-          </form>
         </div>
 
         <div class="d-flex align-items-center">
-          <BDropdown class="dropdown d-md-none topbar-head-dropdown header-item" variant="ghost-secondary" dropstart
-            no-caret :offset="{ alignmentAxis: 55, crossAxis: 15, mainAxis: 0 }"
-            toggle-class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle material-shadow-none show "
-            menu-class="dropdown-menu-lg dropdown-menu-end p-0">
-            <template #button-content>
-              <i class="bx bx-search fs-22"></i>
-            </template>
-            <BDropdownItem aria-labelledby="page-header-search-dropdown">
-              <form class="p-3">
-                <div class="form-group m-0">
-                  <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search ..."
-                      aria-label="Recipient's username" />
-                    <BButton variant="primary" type="submit">
-                      <i class="mdi mdi-magnify"></i>
-                    </BButton>
-                  </div>
-                </div>
-              </form>
-            </BDropdownItem>
-          </BDropdown>
 
-          <BDropdown class="dropdown" variant="ghost-secondary" dropstart no-caret
+
+          <BDropdown class="dropdown" variant="ghost-secondary" dropstart no-caret 
             :offset="{ alignmentAxis: 55, crossAxis: 15, mainAxis: -50 }"
-            toggle-class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle material-shadow-none"
+            toggle-class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle material-shadow-none d-none"
             menu-class="dropdown-menu-end">
-            <template #button-content> <img id="header-lang-img" src="@/assets/images/flags/ru.svg"
-                alt="Header Language" height="20" class="rounded">
+            <template #button-content>
+              <img id="header-lang-img" :src="flag" alt="Header Language" height="20" class="rounded">
             </template>
             <BLink href="javascript:void(0);" class="dropdown-item notify-item language py-2"
               v-for="(entry, key) in languages" :data-lang="entry.language" :title="entry.title"
@@ -356,291 +224,9 @@ export default {
           </BDropdown>
 
 
-          <div class="ms-1 header-item d-none d-sm-flex">
-            <BButton type="button" variant="ghost-secondary"
-              class="btn-icon btn-topbar rounded-circle material-shadow-none" data-toggle="fullscreen"
-              @click="initFullScreen">
-              <i class="bx bx-fullscreen fs-22"></i>
-            </BButton>
-          </div>
 
-          <div class="ms-1 header-item d-none d-sm-flex">
-            <BButton type="button" variant="ghost-secondary"
-              class="btn-icon btn-topbar rounded-circle light-dark-mode material-shadow-none" @click="toggleDarkMode">
-              <i class="bx bx-moon fs-22"></i>
-            </BButton>
-          </div>
 
-          <BDropdown variant="ghost-dark" dropstart class="ms-1 dropdown" no-caret
-            :offset="{ alignmentAxis: 57, crossAxis: 0, mainAxis: -42 }"
-            toggle-class="btn-icon btn-topbar rounded-circle material-shadow-none"
-            id="page-header-notifications-dropdown" menu-class="dropdown-menu-lg dropdown-menu-end p-0"
-            auto-close="outside">
-            <template #button-content>
-              <i class='bx bx-bell fs-22'></i>
-              <span class="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-danger"><span
-                  class="notification-badge">3</span><span class="visually-hidden">unread
-                  messages
-                </span>
-              </span>
-            </template>
-            <div class="dropdown-head bg-primary bg-pattern rounded-top dropdown-menu-lg">
-              <div class="p-3">
-                <BRow class="align-items-center">
-                  <BCol>
-                    <h6 class="m-0 fs-16 fw-semibold text-white">
-                      Notifications
-                    </h6>
-                  </BCol>
-                  <BCol cols="auto" class="dropdown-tabs">
-                    <BBadge variant="light" class="bg-light text-body fs-13"> 4 New</BBadge>
-                  </BCol>
-                </BRow>
-              </div>
-            </div>
-            <BTabs nav-class="dropdown-tabs nav-tab-custom bg-primary px-2 pt-2">
-              <BTab title=" All (4) " class="tab-pane fade py-2 ps-2 show" id="all-noti-tab" role="tabpanel">
-                <simplebar data-simplebar style="max-height: 300px" class="pe-2">
-                  <div class="text-reset notification-item d-block dropdown-item position-relative">
-                    <div class="d-flex">
-                      <div class="avatar-xs me-3 flex-shrink-0">
-                        <span class="avatar-title bg-info-subtle text-info rounded-circle fs-16">
-                          <i class="bx bx-badge-check"></i>
-                        </span>
-                      </div>
-                      <div class="flex-grow-1">
-                        <BLink href="#!" class="stretched-link">
-                          <h6 class="mt-0 mb-2 lh-base">
-                            Your <b>Elite</b> author Graphic Optimization
-                            <span class="text-secondary">reward</span> is
-                            ready!
-                          </h6>
-                        </BLink>
-                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                          <span><i class="mdi mdi-clock-outline"></i> Just 30 sec ago</span>
-                        </p>
-                      </div>
-                      <div class="px-2 fs-15">
-                        <input class="form-check-input" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
 
-                  <div class="text-reset notification-item d-block dropdown-item position-relative">
-                    <div class="d-flex">
-                      <img src="@/assets/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs flex-shrink-0"
-                        alt="user-pic" />
-                      <div class="flex-grow-1">
-                        <BLink href="#!" class="stretched-link">
-                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
-                            Angela Bernier
-                          </h6>
-                        </BLink>
-                        <div class="fs-13 text-muted">
-                          <p class="mb-1">
-                            Answered to your comment on the cash flow forecast's graph 🔔.
-                          </p>
-                        </div>
-                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                          <span><i class="mdi mdi-clock-outline"></i> 48 min ago</span>
-                        </p>
-                      </div>
-                      <div class="px-2 fs-15">
-                        <input class="form-check-input" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="text-reset notification-item d-block dropdown-item position-relative">
-                    <div class="d-flex">
-                      <div class="avatar-xs me-3 flex-shrink-0">
-                        <span class="avatar-title bg-danger-subtle text-danger rounded-circle fs-16">
-                          <i class="bx bx-message-square-dots"></i>
-                        </span>
-                      </div>
-                      <div class="flex-grow-1">
-                        <BLink href="#!" class="stretched-link">
-                          <h6 class="mt-0 mb-2 fs-13 lh-base">
-                            You have received <b class="text-success">20</b> new messages in the conversation
-                          </h6>
-                        </BLink>
-                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                          <span><i class="mdi mdi-clock-outline"></i> 2 hrs
-                            ago</span>
-                        </p>
-                      </div>
-                      <div class="px-2 fs-15">
-                        <input class="form-check-input" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="text-reset notification-item d-block dropdown-item position-relative">
-                    <div class="d-flex">
-                      <img src="@/assets/images/users/avatar-8.jpg" class="me-3 rounded-circle avatar-xs flex-shrink-0"
-                        alt="user-pic" />
-                      <div class="flex-grow-1">
-                        <BLink href="#!" class="stretched-link">
-                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
-                            Maureen Gibson
-                          </h6>
-                        </BLink>
-                        <div class="fs-13 text-muted">
-                          <p class="mb-1">
-                            We talked about a project on linkedin.
-                          </p>
-                        </div>
-                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                          <span><i class="mdi mdi-clock-outline"></i> 4 hrs
-                            ago</span>
-                        </p>
-                      </div>
-                      <div class="px-2 fs-15">
-                        <input class="form-check-input" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="my-3 text-center">
-                    <BButton type="button" variant="soft-success">
-                      View All Notifications
-                      <i class="ri-arrow-right-line align-middle"></i>
-                    </BButton>
-                  </div>
-                </simplebar>
-              </BTab>
-
-              <BTab title="Messages" class="tab-pane fade py-2 ps-2" id="messages-tab" role="tabpanel"
-                aria-labelledby="messages-tab">
-                <simplebar data-simplebar style="max-height: 300px" class="pe-2">
-                  <div class="text-reset notification-item d-block dropdown-item">
-                    <div class="d-flex">
-                      <img src="@/assets/images/users/avatar-3.jpg" class="me-3 rounded-circle avatar-xs"
-                        alt="user-pic" />
-                      <div class="flex-grow-1">
-                        <BLink href="#!" class="stretched-link">
-                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
-                            James Lemire
-                          </h6>
-                        </BLink>
-                        <div class="fs-13 text-muted">
-                          <p class="mb-1">
-                            We talked about a project on linkedin.
-                          </p>
-                        </div>
-                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                          <span><i class="mdi mdi-clock-outline"></i> 30 min ago</span>
-                        </p>
-                      </div>
-                      <div class="px-2 fs-15">
-                        <input class="form-check-input" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="text-reset notification-item d-block dropdown-item">
-                    <div class="d-flex">
-                      <img src="@/assets/images/users/avatar-2.jpg" class="me-3 rounded-circle avatar-xs"
-                        alt="user-pic" />
-                      <div class="flex-grow-1">
-                        <BLink href="#!" class="stretched-link">
-                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
-                            Angela Bernier
-                          </h6>
-                        </BLink>
-                        <div class="fs-13 text-muted">
-                          <p class="mb-1">
-                            Answered to your comment on the cash flow
-                            forecast's graph 🔔.
-                          </p>
-                        </div>
-                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                          <span><i class="mdi mdi-clock-outline"></i> 2 hrs
-                            ago</span>
-                        </p>
-                      </div>
-                      <div class="px-2 fs-15">
-                        <input class="form-check-input" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="text-reset notification-item d-block dropdown-item">
-                    <div class="d-flex">
-                      <img src="@/assets/images/users/avatar-6.jpg" class="me-3 rounded-circle avatar-xs"
-                        alt="user-pic" />
-                      <div class="flex-grow-1">
-                        <BLink href="#!" class="stretched-link">
-                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
-                            Kenneth Brown
-                          </h6>
-                        </BLink>
-                        <div class="fs-13 text-muted">
-                          <p class="mb-1">
-                            Mentionned you in his comment on 📃 invoice
-                            #12501.
-                          </p>
-                        </div>
-                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                          <span><i class="mdi mdi-clock-outline"></i> 10 hrs
-                            ago</span>
-                        </p>
-                      </div>
-                      <div class="px-2 fs-15">
-                        <input class="form-check-input" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="text-reset notification-item d-block dropdown-item">
-                    <div class="d-flex">
-                      <img src="@/assets/images/users/avatar-8.jpg" class="me-3 rounded-circle avatar-xs"
-                        alt="user-pic" />
-                      <div class="flex-grow-1">
-                        <BLink href="#!" class="stretched-link">
-                          <h6 class="mt-0 mb-1 fs-13 fw-semibold">
-                            Maureen Gibson
-                          </h6>
-                        </BLink>
-                        <div class="fs-13 text-muted">
-                          <p class="mb-1">
-                            We talked about a project on linkedin.
-                          </p>
-                        </div>
-                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                          <span><i class="mdi mdi-clock-outline"></i> 3 days
-                            ago</span>
-                        </p>
-                      </div>
-                      <div class="px-2 fs-15">
-                        <input class="form-check-input" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="my-3 text-center">
-                    <BButton type="button" variant="soft-success">
-                      View All Messages
-                      <i class="ri-arrow-right-line align-middle"></i>
-                    </BButton>
-                  </div>
-                </simplebar>
-              </BTab>
-
-              <BTab title="Alerts" class="p-4">
-                <simplebar data-simplebar style="max-height: 300px" class="pe-2">
-                  <div class="w-25 w-sm-50 pt-3 mx-auto">
-                    <img src="@/assets/images/svg/bell.svg" class="img-fluid" alt="user-pic" />
-                  </div>
-                  <div class="text-center pb-5 mt-2">
-                    <h6 class="fs-18 fw-semibold lh-base">
-                      Hey! You have no any notifications
-                    </h6>
-                  </div>
-                </simplebar>
-              </BTab>
-            </BTabs>
-          </BDropdown>
 
           <BDropdown variant="link" class="ms-sm-3 header-item topbar-user"
             toggle-class="rounded-circle material-shadow-none" no-caret id="page-header-user-dropdown"
@@ -656,24 +242,17 @@ export default {
                 </span>
               </span>
             </template>
-            <h6 class="dropdown-header">Welcome Anna!</h6>
             <router-link class="dropdown-item" to="/profile"><i
                 class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i>
-              <span class="align-middle"> Profile</span>
+              <span class="align-middle"> Профиль</span>
             </router-link>
 
 
             <div class="dropdown-divider"></div>
 
-            <router-link class="dropdown-item" to="/profile-setting">
-              <BBadge variant="success-subtle" class="bg-success-subtle text-success mt-1 float-end">New</BBadge><i
-                class="mdi mdi-cog-outline text-muted fs-16 align-middle me-1"></i>
-              <span class="align-middle"> Settings</span>
-            </router-link>
-
             <router-link to="/login" @click="logout" class="dropdown-item"><i
                 class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
-              <span class="align-middle" data-key="t-logout"> Logout</span>
+              <span class="align-middle" data-key="t-logout">Выход</span>
             </router-link>
           </BDropdown>
         </div>
