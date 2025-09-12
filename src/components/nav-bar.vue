@@ -49,14 +49,14 @@ export default {
 
 
     toggleHamburgerMenu() {
-      var windowSize = document.documentElement.clientWidth;
-      let layoutType = document.documentElement.getAttribute("data-layout");
+      var windowSize = document.documentElement?.clientWidth;
+      let layoutType = document.documentElement?.getAttribute("data-layout");
 
-      document.documentElement.setAttribute("data-sidebar-visibility", "show");
-      let visiblilityType = document.documentElement.getAttribute("data-sidebar-visibility");
+      document.documentElement?.setAttribute("data-sidebar-visibility", "show");
+      let visiblilityType = document?.documentElement?.getAttribute("data-sidebar-visibility");
 
       if (windowSize > 767) {
-        document.querySelector(".hamburger-icon").classList.toggle("open");
+        document?.querySelector(".hamburger-icon")?.classList?.toggle("open");
 
       }
 
@@ -139,7 +139,7 @@ export default {
       const defaultLanguage = this.languages.find(lang => lang.language === i18n.global.locale);
       if (defaultLanguage) {
         this.flag = defaultLanguage.flag;
-        document.getElementById('header-lang-img').setAttribute('src', defaultLanguage.flag);
+        document.getElementById('header-lang-img')?.setAttribute('src', defaultLanguage.flag);
       }
     }
 

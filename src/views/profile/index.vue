@@ -14,6 +14,8 @@ export default {
   components: { flatPickr, Layout },
   setup() {
     const user = ref(JSON.parse(localStorage.getItem('user')));
+    const toggle_password = ref(true);
+    const password = ref({ password: "", new_password: '', confirm_password: '' })
 
     const updateAvatar = async (file) => {
       try {
@@ -73,14 +75,64 @@ export default {
         });
       }
     };
+
+    const updatePassword = async () => {
+      if(password.value.password.trim() == '' || password.value.new_password.trim() == '') return
+
+      if (password.value.new_password.length < 6) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Ошибка',
+          text: 'Пароль должен содержать минимум 6 символов.',
+        });
+        return;
+      }
+
+      if (password.value.new_password !== password.value.confirm_password) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Ошибка',
+          text: 'Пароли не совпадают.',
+        });
+        return;
+      }
+
+
+      try {
+        const response = await axiosInstance.post('/users/me/change-password/', password.value);
+
+        if (response.status !== 200) {
+          throw new Error('Не удалось обновить пароль.');
+        }
+
+        password.value = { password: "", new_password: '', confirm_password: '' }; // Сбросить поля пароля
+
+       Swal.fire({
+          icon: 'success',
+          title: 'Пароль обновлен',
+          text: 'Ваш пароль был успешно обновлен.',
+        });
+
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Ошибка',
+          text: error.message,
+        });
+      }
+    }
+
     return {
       user,
+      password,
+      toggle_password,
       handleAvatarChange(event) {
         const file = event.target.files[0];
         if (file) {
           updateAvatar(file).then(() => updateUserDetails());
         }
       },
+      updatePassword,
       updateUserDetails
     };
   }
@@ -190,6 +242,52 @@ export default {
                     <label for="additionalInfoTextarea" class="form-label">Дополнительная информация</label>
                     <textarea class="form-control" id="additionalInfoTextarea" v-model="user.additional_information"
                       placeholder="Введите дополнительную информацию" rows="3"></textarea>
+                  </div>
+                </BCol>
+                <BCol lg="12">
+                  <div class="hstack gap-2 justify-content-end">
+                    <BButton type="submit" variant="primary">Обновить</BButton>
+                    <router-link to="/">
+                      <BButton type="button" variant="soft-success">Отменить</BButton>
+                    </router-link>
+                  </div>
+                </BCol>
+              </BRow>
+            </form>
+          </BCardBody>
+        </BCard>
+        <BCard no-body class="mt-4">
+          <BCardBody class="p-4 pt-2">
+            <form @submit.prevent="updatePassword">
+              <BRow class="pt-4">
+                <BCol lg="4">
+                  <div class="mb-3">
+                    <label for="password" class="form-label">Введите текущий пароль</label>
+                    <div class="position-relative auth-pass-inputgroup mb-3">
+                      <input :type="!toggle_password ? 'text' : 'password'" v-model="password.password" class="form-control" id="password"
+                        placeholder="Введите текущий пароль" />
+                        <BButton variant="link"
+                          class="position-absolute end-0 top-0 text-decoration-none text-muted material-shadow-none"
+                          type="button" id="password-addon" @click="toggle_password = !toggle_password"><i
+                            class="ri-eye-fill align-middle"></i></BButton>
+                    </div>
+                    <p class="required_field light" v-if="!password.password==='' && password?.password?.lenght < 6">Пароль должен содержать минимум 6 цифр</p>
+                  </div>
+                </BCol>
+                <BCol lg="4">
+                  <div class="mb-3">
+                    <label for="new_password" class="form-label">Новый пароль</label>
+                    <input :type="!toggle_password ? 'text' : 'password'" v-model="password.new_password" class="form-control" id="new_password"
+                      placeholder="Введите новый пароль" />
+                    <p class="required_field light" v-if="!password.new_password==='' && password?.new_password?.lenght < 6">Пароль должен содержать минимум 6 цифр</p>
+                  </div>
+                </BCol>
+                <BCol lg="4">
+                  <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Повторите новый пароль</label>
+                    <input :type="!toggle_password ? 'text' : 'password'" v-model="password.confirm_password" class="form-control" id="confirm_password"
+                      placeholder="Повторите новый пароль" />
+                    <p class="required_field light" v-if="!password.new_password==='' && (password?.new_password === password?.confirm_password)">Пароль должен содержать минимум 6 цифр</p>
                   </div>
                 </BCol>
                 <BCol lg="12">

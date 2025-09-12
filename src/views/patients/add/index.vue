@@ -92,10 +92,10 @@ const rules = {
     first_name: { required },
     last_name: { required },
     middle_name: {},
-    birth_date: { required },
+    birth_date: { },
     pinfl: { required, minLength: minLength(14), maxLength: maxLength(14), numeric },
     passport: { required, maxLengthWithoutSpaces: maxLengthWithoutSpaces(9) },
-    age: { required, numeric },
+    age: { numeric },
     gender: { required },
     ethnicity: {},
     social_group: {},
@@ -104,7 +104,7 @@ const rules = {
         required: helpers.withMessage('Поле обязательно для заполнения', required), 
         digitsOnlyValidator
       },
-    additional_phone_number: { numeric },
+    additional_phone_number: { digitsOnlyValidator },
     email: { email },
     telegram_username: {},
     region: {},
@@ -194,6 +194,8 @@ function translate(text) {
 
 const handleSubmi1 = (async () => {
     v$.value.$touch();
+        console.log(form.value.phone, form.value.additional_phone_number);
+
     if (v$.value.$invalid) {
         Swal.fire({
             title: "Ошибка валидации",
@@ -206,6 +208,10 @@ const handleSubmi1 = (async () => {
         form.value.phone = form.value.phone.replace(/[\s()-]/g, "");
         form.value.additional_phone_number = form.value.additional_phone_number.replace(/[\s()-]/g, "");
         form.value.passport = form.value.passport.replace(' ', '');
+
+        console.log(form.value.phone, form.value.additional_phone_number);
+        
+
         const responsePatient = await axiosInstance.post("/patients/", form.value);
 
         if (responsePatient.status === 201 || responsePatient.status === 200) {
@@ -266,7 +272,25 @@ const options = {
 };
 
 
-
+// "created_by": "optional",
+// "curator": "optional",
+// "age": "optional",
+// "gender": "required",
+// "ethnicity": "optional",
+// "social_group": "optional",
+// "profession": "optional",
+// "demographic_additional": "optional",
+// "additional_phone_number": "optional",
+// "email": "optional",
+// "telegram_username": "optional",
+// "region": "optional",
+// "district": "optional",
+// "city": "optional",
+// "mahalla": "optional",
+// "street": "optional",
+// "building": "optional",
+// "latitude": "optional",
+// "longitude": "optional"
 
 </script>
 
@@ -279,7 +303,7 @@ const options = {
                     <BCardBody class="checkout-tab">
                         <BForm action="#">
                             <div class="step-arrow-nav mt-n3 mx-n3 mb-3">
-                                <BTabs nav-class="nav-pills nav-justified " v-model="tabIndex">
+                                <BTabs nav-class="nav-pills nav-justified" v-model="tabIndex">
                                     <BTab active class="nav-item nav-link p-3">
                                         <template #title>
                                             <div class="fs-15">
@@ -293,7 +317,7 @@ const options = {
                                                 <BCol sm="4">
                                                     <div class="mb-3">
                                                         <label for="billinginfo-firstName" class="form-label">{{
-                                    $t('first_name') }}</label>
+                                    $t('first_name') }} <span class="required_field">*</span></label>
                                                         <input v-model="form.first_name" type="text"
                                                             :class="['form-control', { 'is-invalid': v$.first_name.$error }]"
                                                             id="billinginfo-firstName" placeholder="Введите фамилию" />
@@ -306,7 +330,7 @@ const options = {
                                                 <BCol sm="4">
                                                     <div class="mb-3">
                                                         <label for="billinginfo-lastName" class="form-label">{{
-                                    $t('last_name') }}</label>
+                                    $t('last_name') }}<span class="required_field">*</span></label>
                                                         <input v-model="form.last_name" type="text"
                                                             :class="['form-control', { 'is-invalid': v$.last_name.$error }]"
                                                             id="billinginfo-lastName" placeholder="Введите имя" />
@@ -339,9 +363,9 @@ const options = {
                                                                 v-model="form.birth_date" :config="DateConfig"
                                                                 :class="['form-control', { 'is-invalid': v$.birth_date.$error }]"
                                                                 id="caledate"></flat-pickr>
-                                                            <div v-if="v$.birth_date.$error" class="invalid-feedback">
+                                                            <!-- <div v-if="v$.birth_date.$error" class="invalid-feedback">
                                                                 Поле обязательное для заполнения
-                                                            </div>
+                                                            </div> -->
                                                         </div>
                                                     </div>
                                                 </BCol>
@@ -467,17 +491,18 @@ const options = {
                                                     <div class="mb-3">
                                                         <label for="billinginfo-firstName" class="form-label"> {{
                                     $t('demog_contact.old') }}</label>
-                                                        <input v-model="form.age" :disabled="true" type="number" class="form-control"  :class="['form-control', { 'is-invalid': v$.age.$error }]"
-                                                            placeholder="Введите ваш возраст" />
-                                                            <div v-if="v$.age.$error" class="invalid-feedback">
+                                                        <input v-model="form.age" :disabled="true" type="number" class="form-control"  
+                                                        placeholder="Введите ваш возраст" />
+                                                        <!-- :class="['form-control', { 'is-invalid': v$.age.$error }]" -->
+                                                            <!-- <div v-if="v$.age.$error" class="invalid-feedback">
                                                             Поле обязательное для заполнения
-                                                        </div>
+                                                        </div> -->
                                                     </div>
                                                 
                                                 </BCol>
                                                 <BCol sm="4">
                                                     <div class="mb-3">
-                                                        <label> {{ $t('demog_contact.gender') }}</label>
+                                                        <label> {{ $t('demog_contact.gender') }} <span class="required_field">*</span></label>
                                                         <BFormSelect v-model="form.gender"  :class="['form-control', { 'is-invalid': v$.gender.$error }]"
                                                             aria-label="Default select example">
                                                             <BFormSelectOption :value="null" disabled>Выбрать...
@@ -614,7 +639,7 @@ const options = {
                                             <BRow class="mb-2">
                                                 <BCol sm="4">
                                                     <div class="mb-3">
-  <label class="form-label">{{ $t('demog_contact.basic_contact') }}</label>
+  <label class="form-label">{{ $t('demog_contact.basic_contact') }} <span class="required_field">*</span></label>
   <input 
     v-model="form.phone" 
     :class="['form-control', { 'is-invalid': v$.phone.$error }]" 
@@ -660,7 +685,7 @@ const options = {
                                             <BRow class="mt-3">
                                                 <BCol sm="4">
                                                     <div class="mb-3">
-                                                        <label class="form-label">{{ $t('demog_contact.city') }}</label>
+                                                        <label class="form-label">{{ $t('demog_contact.city') }} <span class="required_field">*</span></label>
                                                         <BFormSelect class="mb-3" v-model="form.region"
                                                             @change="onRegionChange">
                                                             <BFormSelectOption :value="null" disabled>Выберите область
@@ -677,7 +702,7 @@ const options = {
                                                 <BCol sm="4">
                                                     <div class="mb-3">
                                                         <label class="form-label" for="district">{{
-                                    $t('demog_contact.town') }}</label>
+                                    $t('demog_contact.town') }} <span class="required_field">*</span></label>
                                                         <BFormSelect class="mb-3" v-model="form.district"
                                                             :disabled="!form.region">
                                                             <BFormSelectOption :value="null" disabled>Выберите район

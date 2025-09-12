@@ -67,12 +67,21 @@ export default {
 
               userService.getAll()
                 .then(response => {
-                  localStorage.setItem('user', JSON.stringify(response));
-
-                     // Redirect to the originally requested page, or to the home page
-                  this.$router.push({
-                    path: '/'
-                  });
+                  if(response.user_type === "PATIENT") {
+                    this.tryingToLogIn = false;
+                    this.authError = "Пользователь не найден";
+                    this.isAuthError = true;
+                    this.processing = false;
+                    localStorage.removeItem('token')
+                  } else {
+                    localStorage.setItem('user', JSON.stringify(response));
+  
+                    // Redirect to the originally requested page, or to the home page
+                    this.$router.push({
+                      path: '/'
+                    });
+                  }
+                  
                 })
                 .catch(error => {
                   console.error(error);

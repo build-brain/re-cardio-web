@@ -9,11 +9,31 @@ import flatPickr from "vue-flatpickr-component";
 import "flatpickr/dist/flatpickr.css";
 import Swal from "sweetalert2";
 import { useRoute } from 'vue-router';
+import * as XLSX from 'xlsx'
 
 import { ref } from "vue";
 
 import { mapState, mapActions, mapMutations, mapGetters } from 'vuex';
 
+const genders = {
+  male: 'Мужчина',
+  female: 'Женщина'
+}
+
+const ethnicities = {
+  asian: 'Азиаты',
+  european: 'Европейцы',
+  other: 'Прочие',
+}
+
+
+const professions = {
+  worker: 'рабочие',
+  employee: 'служащие',
+  freelancer: 'лица свободных профессий',
+  priest: 'священнослужители',
+  other: 'прочее',
+}
 
 export default {
   
@@ -214,7 +234,175 @@ export default {
                 this.fetchEcr(this.page);
             }
         },
-   
+        
+        async exportPatientToExcel(id) {
+            try {
+                const { data } = await axiosInstance.get(`/er-cards/${id}/`);
+                const { data: dnevnik } = await axiosInstance.get(`/health-diary-records/?er_card=${id}`);
+                const { data: patient } = await axiosInstance.get(`/patients/${data?.patient?.id}/`);
+                const { data: caSheet } = await axiosInstance.get(`/ca-sheets/${id}`);
+
+                // ===== Вспомогательная функция для автоширины =====
+                function fitToColumn(data) {
+                    return data[0].map((_, colIndex) => {
+                        let maxLength = data.reduce((max, row) => {
+                            const value = row[colIndex] ? row[colIndex].toString() : "";
+                            return Math.max(max, value.length);
+                        }, 10);
+                        return { wch: maxLength + 2 };
+                    });
+                }
+
+                // ===== Лист Пациент =====
+                const patientHeaders = [
+                    "ID", "Имя и фамилия", "Пол", "Возраст", "Дата регистрации",
+                    "Этногруппа", "Род деятельности", "Регион", "ЭКР ID*",
+                ];        
+                const patientRow = [
+                    patient?.id,
+                    `${patient.first_name} ${patient.last_name}`,
+                    genders[patient.gender] ?? "-",
+                    patient.age ?? "-",
+                    patient.date_joined ? new Date(patient.date_joined).toLocaleString() : "-",
+                    ethnicities[patient.ethnicity] ?? "-",
+                    professions[patient.profession] ?? "-",
+                    patient.region ?? "-",
+                    patient.active_ercard_id ?? "-",
+                ];
+                const patientData = [patientHeaders, patientRow];
+                const patientSheet = XLSX.utils.aoa_to_sheet(patientData);
+                patientSheet['!cols'] = fitToColumn(patientData);
+
+                // ===== Лист ЛОСП =====
+                const caShetHeaders = [
+                    "ЭКР ID","ЖКФ_дата","ЖКФ_рост","ЖКФ_вес","ЖКФ_ИМТ","ЖКФ_Темп",
+                    "ЖКФ_АД_С","ЖКФ_АД_Д","ЖКФ_ЧСС","ЖКФ_ЧДД","ЖКФ_SpO2","Хрипы","Отеки",
+                    "Тропонин I","Креатинин","Стенокардия","Killip","NYHA","Мориски Грин",
+                    "HADS_т","HADS_д","ЧКВ_реваск.","ЧКВ_стент.","ЧКВ_коронароанг.","ЧКВ_СПКР",
+                    "ИМ_дата","ИМ_локализация","ИМ_тип","ИМ_поражение","ИМ_характер",
+                    "ЭКГ_зубец_Q","ЭКГ_отклонение_ST","ЭКГ__инверсия_зубца_Т",
+                    "Диагноз_дата","Диагноз_основной","Диагноз_дополнит.",
+                    ...(caSheet?.complications?.map((_, i) => `Диагноз_осложнения_гр${i + 1}*`) || [])
+                ];
+                const caSheetRow = [
+                    caSheet.er_card,
+                    new Date(caSheet.examination_date)?.toISOString().split("T")[0] ?? "",
+                    caSheet.height, caSheet.weight, caSheet.body_mass_index,
+                    caSheet.body_temperature, caSheet.systolic_pressure, caSheet.diastolic_pressure,
+                    caSheet.pulse_rate, caSheet.respiratory_rate, caSheet.spo2,
+                    caSheet.moist_rales ? "Да" : "Нет",
+                    caSheet.lower_limb_edema ? "Да" : "Нет",
+                    caSheet.troponin, caSheet.creatinine,
+                    caSheet.coronary_insufficiency, caSheet.killip, caSheet.nyha, caSheet.morisky_green,
+                    caSheet.anxiety_level, caSheet.depression_level,
+                    caSheet.revascularization ? "Да" : "Нет",
+                    caSheet.stenting ? "Да" : "Нет",
+                    caSheet.coronary_angiography ? "Да" : "Нет",
+                    caSheet.stemi ? "Да" : "Нет",
+                    new Date(caSheet.ami_date)?.toISOString().split("T")[0] ?? "",
+                    caSheet.ami_localization, caSheet.mi_type, caSheet.myocardium_damage, caSheet.acs_characteristics,
+                    caSheet.q_wave ? "Да" : "Нет",
+                    caSheet.st_segment_elevation ? "Да" : "Нет",
+                    caSheet.t_wave_inversion ? "Да" : "Нет",
+                    new Date(caSheet.issue_date)?.toISOString().split("T")[0] ?? "",
+                    caSheet.primary_disease,
+                    caSheet.accompanying_pathologies ? "Да" : "Нет",
+                    ...(caSheet?.complications?.map((c) => c.name) || [])
+                ];
+                const caSheetData = [caShetHeaders, caSheetRow];
+                const caSheetSheet = XLSX.utils.aoa_to_sheet(caSheetData);
+                caSheetSheet['!cols'] = fitToColumn(caSheetData);
+
+                // ===== Лист ЭКР =====
+                const ecrHeaders = ["ЭКР ID*","Прогресс КР","День КР","Ступень ДА","Класс тяжести"];
+                const ecrRow = [
+                    id, data?.rc_progress ?? "-", data?.rc_day ?? "-", data.activity_stage ?? "-",
+                    caSheet.patient_severity_class ?? "-"
+                ];
+                const ecrData = [ecrHeaders, ecrRow];
+                const ecrSheet = XLSX.utils.aoa_to_sheet(ecrData);
+                ecrSheet['!cols'] = fitToColumn(ecrData);
+
+                // ===== Лист КС_Исход =====
+                function mapReason(reason) {
+                    const vtek = ["FR", "PR", "NR"];
+                    const saq = ["SQL", "BQL", "WQL"];
+                    return {
+                        vtek: vtek.includes(reason) ? reason : "",
+                        saq: saq.includes(reason) ? reason : "",
+                        unplanned: reason,
+                    };
+                }
+                const reason = mapReason(data?.archive_data?.reason);
+                const archiveDataHeaders = [
+                    "ЭКР ID*","Дата","Запись_КС","Запись_КС_ШОКС","Запись_КС_ФК",
+                    "Запись_КС_BARC","Исход_план_ВТЭК","Исход_план_без_ВТЭК","Исход_план_SAQ","Исход_внеплан",
+                ];
+                const archiveDataRow = [
+                    id,
+                    data?.archive_data?.archive_date,
+                    data?.archive_data?.context?.fa ?? "",
+                    data?.archive_data?.context?.ss ?? "",
+                    data?.archive_data?.context?.ts ?? "",
+                    data?.archive_data?.context?.ul ?? "",
+                    data?.archive_data?.context?.vb ?? "",
+                    reason?.vtek, reason?.saq,
+                    data?.archive_data?.type === "UP" ? reason.unplanned : "",
+                ];
+                const archiveDataData = [archiveDataHeaders, archiveDataRow];
+                const archiveData = XLSX.utils.aoa_to_sheet(archiveDataData);
+                archiveData['!cols'] = fitToColumn(archiveDataData);
+
+                // ===== Лист Медикаменты =====
+                const prescriptionsHeaders = ["ЭКР ID*","Препарат*","Доза","Дата","Время","Да/Нет"];
+                const prescriptionsRows = data?.prescriptions?.map(p => p?.medicines?.map(m => [
+                    id, m.name ?? "-", m?.dose ?? "-",
+                    m?.created_at ? new Date(m.created_at).toDateString() : "-",
+                    m?.created_at ? new Date(m.created_at).toTimeString() : "-",
+                    m?.is_active ? "Да" : "Нет",
+                ])).flat(1) || [];
+                const prescriptionsData = [prescriptionsHeaders, ...prescriptionsRows];
+                const prescriptions = XLSX.utils.aoa_to_sheet(prescriptionsData);
+                prescriptions['!cols'] = fitToColumn(prescriptionsData);
+
+                // ===== Лист Дневник =====
+                const dnevnikHeaders = [
+                    "ЭКР ID*","Дата","АД","ЧСС","ЧДД","Т","SpO₂","ДА_время","ДА_шаги","ДА_дистанция",
+                    "Боль","Отдышка","Усталость",
+                ];
+                const dnevnikRows = dnevnik.map((item) => [
+                    id ?? "-",
+                    item.creation_date ? new Date(item.creation_date).toLocaleString() : "-",
+                    `${item.systolic_pressure ?? "-"}/${item.diastolic_pressure ?? "-"}`,
+                    item.pulse_rate ?? "-", item.respiratory_rate ?? "-",
+                    item.body_temperature ?? "-", item.blood_saturation ?? "-",
+                    item.walking_duration ?? "-", item.step_count ?? "-", item.distance_covered ?? "-",
+                    item.heart_pain ? "Да" : "Нет", item.dyspnea ? "Да" : "Нет", item.fatigue ? "Да" : "Нет",
+                ]);
+                const dnevnikData = [dnevnikHeaders, ...dnevnikRows];
+                const dnevniks = XLSX.utils.aoa_to_sheet(dnevnikData);
+                dnevniks['!cols'] = fitToColumn(dnevnikData);
+
+                // ===== Сборка Excel =====
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, patientSheet, "Пациент");
+                XLSX.utils.book_append_sheet(workbook, ecrSheet, "ЭКР");
+                XLSX.utils.book_append_sheet(workbook, caSheetSheet, "ЛОСП");
+                XLSX.utils.book_append_sheet(workbook, dnevniks, "Дневник");
+                XLSX.utils.book_append_sheet(workbook, archiveData, "КС_Исход");
+                XLSX.utils.book_append_sheet(workbook, prescriptions, "Медикаменты");
+
+                XLSX.writeFile(workbook, `${patient.first_name} ${patient.last_name}.xlsx`);
+            } catch (error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Ошибка загрузки",
+                    text: "Не удалось загрузить файл Excel. Проверьте формат или попробуйте снова.",
+                    confirmButtonText: "Ок",
+                });
+                console.error(error);
+            }
+        },
 
     },
     async mounted() {
@@ -443,6 +631,12 @@ export default {
 
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover"
+                                                    data-bs-placement="top" title="Эхпорт в xlsx">
+                                                    <button class="btn text-primary" @click="exportPatientToExcel(item.id)">
+                                                        <i class="ri-file-excel-2-fill"></i>
+                                                    </button>
+                                                </li>
   <li class="list-inline-item" v-b-tooltip.hover title="View">
     <router-link :to="`/archive-ecr/profile-erc/${item.id}`" class="text-primary d-inline-block">
       <i class="ri-eye-fill fs-16"></i>

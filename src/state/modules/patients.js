@@ -43,11 +43,11 @@ export const mutations = {
 };
 
 export const actions = {
-    fetchPatients: async ({ commit, state }, { after, before, ethnicity, socialGroup, gender, district, search, active, with_active }) => {
+    fetchPatients: async ({ commit, state }, { after, before, ethnicity, socialGroup, gender, district, search, active, with_active, page }) => {
         try {
             const response = await axiosInstance.get('/patients/', {
                 params: {
-                  page: state.page,
+                  page: page ?? state.page,
                   birth_date_after: after,
                   birth_date_before: before,
                   social_group: socialGroup,

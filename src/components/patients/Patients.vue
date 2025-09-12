@@ -85,14 +85,25 @@ export default {
     incrementPage() {
       if (this.page < this.page_count) {
         this.page++;
-        this.fetchPatients(this.page);
+        this.getPaginatedData(this.page)
       }
     },
     decrementPage() {
       if (this.page > 1) {
         this.page--;
-        this.fetchPatients(this.page);
+        this.getPaginatedData(this.page)
       }
+    },
+    getPaginatedData(page) {
+      this.fetchPatients({
+        page,
+        search: this.search,
+        socialGroup: this.social_group,
+        ethnicity: this.ethnicity,
+        gender: this.gender,
+        district: this.district,
+        active: this.active
+      });
     },
 
     async filterPatients() {
@@ -220,7 +231,10 @@ export default {
         before: before,
       };
 
+      this.page = 1;
+
       await this.fetchPatients({
+        page: this.page,
         search: this.search,
         birthDate,
         socialGroup: this.social_group,
@@ -523,7 +537,7 @@ export default {
                 </BLink>
                 <ul class="pagination listjs-pagination mb-0">
                   <li :class="{ active: pageNumber == page, disabled: pageNumber == '...', }"
-                    v-for="(pageNumber, index) in page_count" :key="index" @click="page = pageNumber">
+                    v-for="(pageNumber, index) in page_count" :key="index" @click="page = pageNumber; getPaginatedData(page)">
                     <BLink class="page" href="#">{{ pageNumber }}</BLink>
                   </li>
                 </ul>
