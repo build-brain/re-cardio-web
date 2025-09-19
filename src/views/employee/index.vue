@@ -103,12 +103,14 @@ const form = ref({
     phone: "",
     middle_name: "",
     birth_date: null,
-    pinfl: "",
+    // pinfl: "",
     passport: "",
     additional_information: "",
     specialty: "",
     mpi: "",
     department: "",
+
+    password: "",
 });
 
 // Date picker configuration
@@ -128,18 +130,22 @@ const rules = {
     },
     middle_name: {},
     birth_date: { required },
-    pinfl: {
-        required,
-        numeric,
-        minLength: minLength(14),
-        maxLength: maxLength(14),
-    },
+    // pinfl: {
+    //     required,
+    //     numeric,
+    //     minLength: minLength(14),
+    //     maxLength: maxLength(14),
+    // },
     passport: {},
     specialty: {},
     mpi: {},
     department: {},
     additional_information: {},
 
+    password: {
+        required,
+        minLength: minLength(6),
+    }
 };
 
 const v$ = useVuelidate(rules, form);
@@ -148,7 +154,7 @@ async function submitForm() {
     v$.value.$touch(); // Запуск проверки валидации
 
     if (!v$.value.$error) {
-        form.value.phone = form.value.phone.replace(/[\s()-]/g, "");
+        form.value.phone = form.value.phone?.replace(/[\s()-]/g, "");
         try {
             await axiosInstance.post("/doctors/", form.value);
             await fetchDoctors(page.value);
@@ -189,12 +195,14 @@ const editForm = reactive({
     phone: "",
     middle_name: "",
     birth_date: null,
-    pinfl: "",
+    // pinfl: "",
     passport: "",
     additional_information: "",
     specialty: "",
     mpi: "",
-    department: ""
+    department: "",
+
+    password: "",
 });
 
 
@@ -209,18 +217,21 @@ const rulesEdit = {
     },
     middle_name: {},
     birth_date: { required },
-    pinfl: {
-        required,
-        numeric,
-        minLength: minLength(14),
-        maxLength: maxLength(14),
-    },
+    // pinfl: {
+    //     required,
+    //     numeric,
+    //     minLength: minLength(14),
+    //     maxLength: maxLength(14),
+    // },
     passport: {},
     specialty: {},
     mpi: {},
     department: {},
     additional_information: {},
 
+    password: {
+        minLength: minLength(6),
+    }
 };
 
 const $v = useVuelidate(rulesEdit, editForm);
@@ -439,12 +450,23 @@ onMounted(async () => {
                                     :config="dateConfig" placeholder="Выберите дату рождения"></flat-pickr>
                             </b-form-group>
 
-                            <b-form-group label="ПИНФЛ" label-for="pinfl" class="mb-3">
+                            <!-- <b-form-group label="ПИНФЛ" label-for="pinfl" class="mb-3">
                                 <b-form-input id="pinfl" v-model="form.pinfl" placeholder="Введите ПИНФЛ"
                                     class="form-control" v-maska data-maska="##############"
                                     :state="!v$.pinfl.$error"></b-form-input>
                                 <BFormInvalidFeedback v-if="v$.pinfl.$error">ПИНФЛ должен содержать 14 цифр
                                 </BFormInvalidFeedback>
+                            </b-form-group> -->
+
+                            <b-form-group label="Пароль" label-for="password" class="mb-3">
+                                <b-form-input id="password" v-model="form.password"
+                                    placeholder="Введите паролья" :state="!v$.password?.$error"></b-form-input>
+                                <BFormInvalidFeedback v-if="v$.password?.$error">Пароль должен содержать минимум 6 цифр
+                                </BFormInvalidFeedback>
+                                <!-- <h1 v-if="v$.password?.$error">Hello</h1> -->
+                                <!-- <pre>
+                                    {{ v$.password }}
+                                </pre> -->
                             </b-form-group>
                         </b-col>
 
@@ -527,11 +549,18 @@ onMounted(async () => {
                                     :config="dateConfig" placeholder="Выберите дату рождения"></flat-pickr>
                             </b-form-group>
 
-                            <b-form-group label="ПИНФЛ" label-for="pinfl" class="mb-3">
+                            <!-- <b-form-group label="ПИНФЛ" label-for="pinfl" class="mb-3">
                                 <b-form-input id="pinfl" v-model="editForm.pinfl" placeholder="Введите ПИНФЛ"
                                     class="form-control" v-maska data-maska="##############"
                                     :state="!$v.pinfl.$error"></b-form-input>
                                 <BFormInvalidFeedback v-if="$v.pinfl.$error">ПИНФЛ должен содержать 14 цифр
+                                </BFormInvalidFeedback>
+                            </b-form-group> -->
+
+                            <b-form-group label="Пароль" label-for="password" class="mb-3">
+                                <b-form-input id="password" v-model="editForm.password"
+                                    placeholder="Введите паролья" :state="!$v.password?.$error"></b-form-input>
+                                <BFormInvalidFeedback v-if="$v.password?.$error">Пароль должен содержать минимум 6 цифр
                                 </BFormInvalidFeedback>
                             </b-form-group>
                         </b-col>

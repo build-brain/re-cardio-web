@@ -6,6 +6,7 @@ import { onMounted, ref, watchEffect, computed } from "vue";
 import formatDate from '@/common/formatDate.js';
 import Types from '@/common/Types.js';
 import Medicine from '../ecr/Medicine.vue';
+import { BFormCheckbox, BFormTextarea } from "bootstrap-vue-next";
 
 const patient = ref([]);
 const admission_data = ref({});
@@ -13,6 +14,7 @@ const patients_profile = ref({});
 const activities = ref([]);
 const events = ref([]);
 const chekpoint = ref([]);
+const eventEcrModal = ref(false)
 
 
 const fieldsactivities = [
@@ -31,6 +33,23 @@ const fieldschekpoint = [
     { key: 'description', label: 'Описание' },
 ];
 
+const options = ref([
+  { value: 'type_0', display_name: 'Тип 0' },
+  { value: 'type_1', display_name: 'Тип 1' },
+  { value: 'type_2', display_name: 'Тип 2' },
+  { value: 'type_3a', display_name: 'Тип 3a' },
+  { value: 'type_3b', display_name: 'Тип 3b' },
+  { value: 'type_3c', display_name: 'Тип 3c' },
+  { value: 'type_4', display_name: 'Тип 4' },
+  { value: 'type_5', display_name: 'Тип 5' }
+]);
+const fcOptions = ref([
+  { value: 1, display_name: 'ФК I' },
+  { value: 2, display_name: 'ФК II' },
+  { value: 3, display_name: 'ФК III' },
+  { value: 4, display_name: 'ФК IV' }
+]);
+
 const generateRecordSummary = (record) => {
     const events = [];
 
@@ -48,6 +67,21 @@ const generateRecordSummary = (record) => {
 };
 const ECR = ref({});
 const healthDATA = ref({});
+const eventDATA = ref({
+    fatal_outcome: false,
+    rehospitalization: false,
+    increased_angina: false,
+    cas_score: null,
+    cas_class: null,
+    nonfatal_myocardial_infarction: false,
+    acute_cerebrovascular_accident: false,
+    bleeding: false,
+    barc_classifier: null,
+    diabetes_decompensation: false,
+    repeat_pci_need: false,
+    cabg_need: false,
+    description: ""
+});
 
 
 const displayHeight = computed(() => healthDATA.value.height ?? ECR.value.height);
@@ -266,8 +300,7 @@ const getStratisticActivity = async () => {
         const get_pulse = await axiosInstance.get(`/health-diary-records/get_pulse_rate_statistic/?by_er_card=${route.params.id}`);
         const getallhealth = await axiosInstance.get(`/health-diary-records/?er_card=${route.params.id}&ordering=-created_at`);
         healthDATA.value = getallhealth.data[0];
-        console.log(healthDATA.value);
-
+        
         if (response.status === 200) {
             arterial_statistic.value = response.data.filter(item => item.y1 !== null);
       
@@ -349,6 +382,47 @@ const truncateText = (text, maxLength) => {
 const isTruncated = (text, maxLength) => {
     return text.length > maxLength;
 };
+
+const createEcrEvent = async () => {
+try {
+    const response = await axiosInstance.post(`/er-cards/${route.params.id}/add_checkpoint_record/`, eventDATA.value);
+    
+    if (response.status === 200) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Отправлено!',
+        text: 'Контрольная точка успешно отправлено.',
+        timer: 2500,
+        timerProgressBar: true
+      });
+      chekpoint.value = response.data.checkpoint_records
+      eventEcrModal.value = false;
+      eventDATA.value = {
+        rehospitalization: false,
+        increased_angina: false,
+        cas_score: null,
+        cas_class: null,
+        nonfatal_myocardial_infarction: false,
+        acute_cerebrovascular_accident: false,
+        bleeding: false,
+        barc_classifier: null,
+        diabetes_decompensation: false,
+        repeat_pci_need: false,
+        cabg_need: false,
+        description: "",
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    Swal.fire({
+      icon: 'error',
+      title: 'Ошибка',
+      text: 'Ошибка при отправке, попробуйте позже!',
+      timer: 2500,
+      timerProgressBar: true
+    });
+  }
+}
 
 
 
@@ -1039,7 +1113,9 @@ onMounted(async () => {
                     <BCard>
                         <BCardHeader class="d-flex justify-content-between p-0 mb-2">
                             <h2 class="fs-4">Записи контрольных событий и исхода КР</h2>
-
+                            <BButton @click="eventEcrModal = true">
+                                Добавить
+                            </BButton>
                         </BCardHeader>
                         <div v-if="chekpoint.length > 0"
                             style="max-height: 300px; min-height:300px; overflow-y: scroll;">
@@ -1072,6 +1148,104 @@ onMounted(async () => {
 
 
         </BCol>
+
+        <BModal v-model="eventEcrModal" title="Добавить запись контрольной точки" body-class="p-4"
+            header-class="p-3 bg-info-subtle" hide-footer class="v-modal-custom" centered>
+            <form @submit.prevent="createEcrEvent">
+                <!-- Чекбоксы -->
+                <div class="d-flex align-items-center mb-3">
+                <BFormCheckbox v-model="eventDATA.fatal_outcome">
+                    летальный исход
+                </BFormCheckbox>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                <BFormCheckbox v-model="eventDATA.rehospitalization">
+                    повторная госпитализация, связанная с дестабилизацией ИБС
+                </BFormCheckbox>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                <BFormCheckbox v-model="eventDATA.increased_angina">
+                    нарастание стенокардии (без госпитализации)
+                </BFormCheckbox>
+                </div>
+
+                <div class="mb-3">
+                <BRow>
+                    <BCol sm="3">
+                    <div class="d-flex flex-wrap">
+                        <span class="fw-bold">Шкала ШОКС:</span>
+                        (0-20 балл)
+                    </div>
+                    </BCol>
+                    <BCol sm="4">
+                    <BFormInput v-model="eventDATA.cas_score" type="number">
+                    </BFormInput>
+                    </BCol>
+                    <BCol sm="2">
+                    <div class="d-flex flex-column">
+                        <span class="fw-bold">ФК:</span>
+                        (1-4)
+                    </div>
+                    </BCol>
+                    <BCol sm="3">
+                    <select v-model="eventDATA.cas_class" class="form-select">
+                        <option v-for="option in fcOptions" :key="option.value" :value="option.value">
+                        {{ option.display_name }}
+                        </option>
+                    </select>
+                    </BCol>
+                </BRow>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                <BFormCheckbox v-model="eventDATA.bleeding">
+                    кровотечение
+                </BFormCheckbox>
+                </div>
+                <BRow :class="{ 'mb-3': true, 'text-muted': !eventDATA.bleeding }">
+                <BCol sm="4">
+                    <div class="d-flex flex-wrap">
+                    <span class="fw-bold">Классификатор BARC:</span>
+                    </div>
+                </BCol>
+                <BCol sm="8">
+                    <select v-model="eventDATA.barc_classifier"
+                    :class="{ 'form-select': true, 'text-muted': !eventDATA.bleeding }"
+                    :disabled="!eventDATA.bleeding">
+                    <option v-for="option in options" :key="option.value" :value="option.value">
+                        {{ option.display_name }}
+                    </option>
+                    </select>
+                </BCol>
+                </BRow>
+
+                <!-- Остальные чекбоксы -->
+                <div class="d-flex align-items-center mb-3">
+                <BFormCheckbox v-model="eventDATA.diabetes_decompensation">
+                    декомпенсация диабета (если есть)
+                </BFormCheckbox>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                <BFormCheckbox v-model="eventDATA.repeat_pci_need">
+                    потребность в повторном ЧКВ
+                </BFormCheckbox>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                <BFormCheckbox v-model="eventDATA.cabg_need">
+                    потребность в АКШ
+                </BFormCheckbox>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Примечания</label>
+                    <textarea v-model="eventDATA.description" cols="30" class="form-control" rows="5"></textarea>
+                </div>
+                <div class="pt-3 d-flex justify-content-between w-full">
+                    <BButton variant="danger" @click="eventEcrModal = false" class="me-2">Закрыть</BButton>
+                    <BButton type="submit" variant="success" class="ms-1">Сохранить</BButton>
+                </div>
+            </form>
+        </BModal>
     </BRow>
 
 

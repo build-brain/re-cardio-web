@@ -89,7 +89,7 @@ const rules = {
     first_name: { required },
     last_name: { required },
     middle_name: {},
-    birth_date: { required },
+    birth_date: { },
     pinfl: { required, minLength: minLength(14), maxLength: maxLength(14), numeric },
     passport: { required, maxLengthWithoutSpaces: maxLengthWithoutSpaces(9) },
     age: { required, numeric },
@@ -311,7 +311,7 @@ onMounted(async () => {
                                             <BCol sm="4">
                                                 <div class="mb-3">
                                                     <label for="billinginfo-firstName" class="form-label">{{
-                                $t('first_name') }}</label>
+                                $t('first_name') }} <span class="required_field">*</span></label>
                                                     <input v-model="form.first_name" type="text"
                                                         :class="['form-control', { 'is-invalid': v$.first_name.$error }]"
                                                         id="billinginfo-firstName" placeholder="Введите фамилию" />
@@ -324,7 +324,7 @@ onMounted(async () => {
                                             <BCol sm="4">
                                                 <div class="mb-3">
                                                     <label for="billinginfo-lastName" class="form-label">{{
-                                $t('last_name') }}</label>
+                                $t('last_name') }} <span class="required_field">*</span></label>
                                                     <input v-model="form.last_name" type="text"
                                                         :class="['form-control', { 'is-invalid': v$.last_name.$error }]"
                                                         id="billinginfo-lastName" placeholder="Введите имя" />
@@ -494,7 +494,7 @@ onMounted(async () => {
                                             </BCol>
                                             <BCol sm="4">
                                                 <div class="mb-3">
-                                                    <label> {{ $t('demog_contact.gender') }}</label>
+                                                    <label> {{ $t('demog_contact.gender') }} <span class="required_field">*</span></label>
                                                     <BFormSelect v-model="form.gender"
                                                         :class="['form-control', { 'is-invalid': v$.gender.$error }]"
                                                         aria-label="Default select example">
@@ -630,7 +630,7 @@ onMounted(async () => {
                                             <BCol sm="4">
                                                 <div class="mb-3">
                                                     <label class="form-label">{{ $t('demog_contact.basic_contact')
-                                                        }}</label>
+                                                        }} <span class="required_field">*</span></label>
                                                     <input v-model="form.phone"
                                                         :class="['form-control', { 'is-invalid': v$.phone.$error }]"
                                                         type="text" placeholder="+998 (___) ___-__-__" v-maska
@@ -671,7 +671,7 @@ onMounted(async () => {
                                         <BRow class="mt-3">
                                             <BCol sm="4">
                                                 <div class="mb-3">
-                                                    <label class="form-label">{{ $t('demog_contact.city') }}</label>
+                                                    <label class="form-label">{{ $t('demog_contact.city') }} <span class="required_field">*</span></label>
                                                     <BFormSelect class="mb-3" v-model="form.region"
                                                         @change="onRegionChange">
                                                         <BFormSelectOption :value="null" disabled>Выберите область
@@ -688,7 +688,7 @@ onMounted(async () => {
                                             <BCol sm="4">
                                                 <div class="mb-3">
                                                     <label class="form-label" for="district">{{
-                                $t('demog_contact.town') }}</label>
+                                $t('demog_contact.town') }} <span class="required_field">*</span></label>
                                                     <BFormSelect class="mb-3" v-model="form.district"
                                                         :disabled="!form.region">
                                                         <BFormSelectOption :value="null" disabled>Выберите район

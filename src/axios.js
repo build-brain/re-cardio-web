@@ -9,7 +9,7 @@ const getToken = () => {
   return null;
 };
 
-const baseURL = 'https://api-cardio.build-brain.uz';
+const baseURL = 'https://api.recardio.uz';
 // 'http://192.168.31.50:8000';
 
 export const axiosInstance = axios.create({ baseURL });
