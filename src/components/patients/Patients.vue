@@ -20,7 +20,7 @@ export default {
       date: null,
       countries: [],
       id_patient:'',
-      emptyMessage: "No options",
+      emptyMessage: "Нет вариантов",
       user: JSON.parse(localStorage.getItem("user")),
       isLoading: false,
       doctormodal: false,

@@ -74,7 +74,7 @@ export default {
       events: [],
       selectedCountries: [],
       countries: [],
-      emptyMessage: "No options",
+      emptyMessage: "Нет вариантов",
       isLoading: false,
       calendarOptions: {
         locale: 'ru',
@@ -455,7 +455,7 @@ export default {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'There was a problem deleting the event. Please try again.'
+            text: 'Произошла ошибка при удалении события. Пожалуйста, попробуйте снова.'
           });
         });
     },
