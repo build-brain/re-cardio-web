@@ -256,7 +256,7 @@ export default {
                 // ===== Лист Пациент =====
                 const patientHeaders = [
                     "ID", "Имя и фамилия", "Пол", "Возраст", "Дата регистрации",
-                    "Этногруппа", "Род деятельности", "Регион", "ЭКР ID*",
+                    "Этногруппа", "Род деятельности", "Регион", "ЭКР ID",
                 ];        
                 const patientRow = [
                     patient?.id,
@@ -267,7 +267,7 @@ export default {
                     ethnicities[patient.ethnicity] ?? "-",
                     professions[patient.profession] ?? "-",
                     patient.region ?? "-",
-                    patient.active_ercard_id ?? "-",
+                    id ?? "-",
                 ];
                 const patientData = [patientHeaders, patientRow];
                 const patientSheet = XLSX.utils.aoa_to_sheet(patientData);
@@ -590,15 +590,16 @@ export default {
                                             </div>
                                         </td>
                                         <td class="date"><span class="ms-4">{{ item.rc_day }}</span></td>
-                                        <td class="contacts d-flex justify-content-evenly align-items-center gap-3">{{
-                            item.activity_stage
-                        }}
-                                            <!-- <li class="list-inline-item" v-b-tooltip.hover title="Ступень ДА">
-                                                <button @click="openModalStage(item.id)"
-                                                    class="btn btn-sm text-primary d-inline-block">
-                                                    <i class="ri-bar-chart-grouped-line fs-6"></i>
-                                                </button>
-                                            </li> -->
+                                        <td class="contacts">
+                                            <div class=" d-flex justify-content-evenly align-items-center gap-3">
+                                                {{item.activity_stage}}
+                                                <!-- <li class="list-inline-item" v-b-tooltip.hover title="Ступень ДА">
+                                                    <button @click="openModalStage(item.id)"
+                                                        class="btn btn-sm text-primary d-inline-block">
+                                                        <i class="ri-bar-chart-grouped-line fs-6"></i>
+                                                    </button>
+                                                </li> -->
+                                            </div>
                                         </td>
                                         <td class="type">{{ item.grace_score }}
                                             <span class="me-1" v-if="item.risk_hospital === 'high'">(высокий)</span>

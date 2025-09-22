@@ -505,7 +505,7 @@ export default {
       }).then((result) => {
         if (result.value) {
           this.deleteEvent();
-          Swal.fire("Deleted!", "Event has been deleted.", "success");
+          Swal.fire("Удалено!", "Мероприятие удалено.", "success");
         }
       });
     },

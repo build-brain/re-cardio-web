@@ -89,6 +89,7 @@ export default {
 
             })
             .catch((error) => {
+              console.log(error.response);
               this.tryingToLogIn = false;
               this.authError = error ? error : "";
               this.isAuthError = true;
@@ -165,7 +166,7 @@ export default {
 
                     <div class="mt-4">
                       <form @submit.prevent="tryToLogIn">
-                        <b-alert v-model="authError" variant="danger" class="mt-3" dismissible>{{ authError }}</b-alert>
+                        <b-alert v-model="authError" variant="danger" class="mt-3" dismissible>Логин или пароль неверный</b-alert>
 
                         <div class="mb-3">
                           <label for="username" class="form-label">Логин</label>

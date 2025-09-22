@@ -1113,9 +1113,10 @@ onMounted(async () => {
                     <BCard>
                         <BCardHeader class="d-flex justify-content-between p-0 mb-2">
                             <h2 class="fs-4">Записи контрольных событий и исхода КР</h2>
-                            <BButton @click="eventEcrModal = true">
-                                Добавить
-                            </BButton>
+                            <button @click="eventEcrModal = true" type="button" class="btn bg-primary btn-sm ms-auto bg-opacity-10 mb-2">
+                                <i class="ri-file-add-fill text-primary align-bottom me-1"></i>
+                                <span class="text-primary fw-bold text-opacity-100">Добавить</span>
+                            </button>
                         </BCardHeader>
                         <div v-if="chekpoint.length > 0"
                             style="max-height: 300px; min-height:300px; overflow-y: scroll;">
