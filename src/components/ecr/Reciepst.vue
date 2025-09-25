@@ -429,7 +429,8 @@ const updateMedicine = async () => {
         console.error(e);
         Swal.fire({
             title: "Ошибка",
-            text: `${e}`,
+            // text: `${e}`, // TODO: check translation
+            text: `Ошибка при обновлении лекарства: ${e.message}`,
             icon: "error",
             timer: 2500,
             timerProgressBar: true
@@ -471,7 +472,8 @@ const confirmDeleteMedicine = async () => {
         console.error(e);
         Swal.fire({
             title: "Ошибка",
-            text: `${e}`,
+            // text: `${e}`, // TODO: check translation
+            text: `Ошибка при удалении лекарства: ${e.message}`,
             icon: "error",
             timer: 2500,
             timerProgressBar: true
@@ -528,7 +530,8 @@ const addMedicineToPrescription = async () => {
         // Show error message
         Swal.fire({
             title: "Ошибка",
-            text: `Ошибка: ${e.message}`,
+            // text: `Ошибка: ${e.message}`, // TODO: check translation
+            text: `Ошибка при добавлении лекарства: ${e.message}`,
             icon: "error",
             timer: 2500,
             timerProgressBar: true
@@ -585,7 +588,8 @@ const confirmDelete = async () => {
         console.error(e);
         Swal.fire({
             title: "Ошибка",
-            text: `${e}`,
+            // text: `${e}`, // TODO: check translation
+            text: `Ошибка при удалении рецепта: ${e.message}`,
             icon: "error",
             timer: 2500,
             timerProgressBar: true

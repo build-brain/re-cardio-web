@@ -53,7 +53,8 @@ export default {
               })
               .catch((error) => {
                 this.tryingToReset = false;
-                this.error = error ? error : "";
+                // this.error = error ? error : ""; // TODO: check translation
+                this.error = `Ошибка при сбросе пароля: ${error.message}`;
                 this.isResetError = true;
               })
           );

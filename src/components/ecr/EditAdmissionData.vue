@@ -59,7 +59,8 @@ const deleteServerFile = async (id) => {
   } catch (error) {
     Swal.fire({
       title: "Ошибка",
-      text: `${error}`,
+      // text: `${error}`, // TODO: check translation
+      text: `Ошибка при удалении файла: ${error.message}`,
       icon: "error",
       timer: 2500,
       timerProgressBar: true
@@ -146,7 +147,8 @@ const getAttachments = async () => {
   } catch (e) {
     Swal.fire({
       title: "Ошибка",
-      text: `${e}`,
+      // text: `${e}`, // TODO: check translation
+      text: `Ошибка при получении данных при госпитализации: ${e.message}`,
       icon: "error",
       timer: 2500,
       timerProgressBar: true

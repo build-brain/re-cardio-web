@@ -45,7 +45,8 @@ export default {
         Swal.fire({
           icon: 'error',
           title: 'Ошибка',
-          text: error.message,
+          // text: error.message, // TODO: check translation
+          text: `Ошибка при обновлении аватара: ${error.message}`,
         });
       }
     };
@@ -71,7 +72,8 @@ export default {
         Swal.fire({
           icon: 'error',
           title: 'Ошибка',
-          text: error.message,
+          // text: error.message, // TODO: check translation
+          text: `Ошибка при обновлении данных пользователя: ${error.message}`,
         });
       }
     };
@@ -117,7 +119,8 @@ export default {
         Swal.fire({
           icon: 'error',
           title: 'Ошибка',
-          text: error.message,
+          // text: error.message, // TODO: check translation
+          text: `Ошибка при обновлении пароля: ${error.message}`,
         });
       }
     }

@@ -1,7 +1,7 @@
 import { axiosInstance } from "../../axios";
 
 export const state = {
-    patients: [],
+    patients: {},
     count: 0,
     page_count: 1,
     page:1,

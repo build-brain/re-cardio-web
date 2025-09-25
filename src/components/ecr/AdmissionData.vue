@@ -179,7 +179,8 @@ export default {
 
                     Swal.fire({
                         title: "Ошибка",
-                        text: `$${admissionResponse.statusText}`,
+                        // text: `$${admissionResponse.statusText}`, // TODO: check translation
+                        text: `Ошибка при добавлении данных при госпитализации: (${admissionResponse.status})`,
                         icon: "error"
                     });
                 }
@@ -188,7 +189,8 @@ export default {
 
                 Swal.fire({
                     title: "Ошибка",
-                    text: `${error.message}`,
+                    // text: `${error.message}`, // TODO: check translation
+                    text: `Ошибка при добавлении данных при госпитализации: ${error.message}`,
                     icon: "error"
                 });
             } finally {

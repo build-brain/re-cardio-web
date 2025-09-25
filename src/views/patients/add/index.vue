@@ -272,26 +272,6 @@ const options = {
 };
 
 
-// "created_by": "optional",
-// "curator": "optional",
-// "age": "optional",
-// "gender": "required",
-// "ethnicity": "optional",
-// "social_group": "optional",
-// "profession": "optional",
-// "demographic_additional": "optional",
-// "additional_phone_number": "optional",
-// "email": "optional",
-// "telegram_username": "optional",
-// "region": "optional",
-// "district": "optional",
-// "city": "optional",
-// "mahalla": "optional",
-// "street": "optional",
-// "building": "optional",
-// "latitude": "optional",
-// "longitude": "optional"
-
 </script>
 
 <template>
