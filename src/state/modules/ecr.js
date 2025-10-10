@@ -115,11 +115,11 @@ export const actions = {
       console.error(error);
     }
   },
-  fetchPatient: async ({ commit }, { active, search, order, without_or_archived_er_card }) => {
+  fetchPatient: async ({ commit }, { active, search, order }) => {
     try {
       const response = await axiosInstance.get("/patients/?limit=5", {
         params: {
-          has_active_ercard: active,
+          without_or_archived_er_card: active,
           search: search,
           ordering: order,
           // ...(without_or_archived_er_card !== undefined && {without_or_archived_er_card })
