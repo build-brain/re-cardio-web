@@ -9,7 +9,7 @@ import { useStore } from "vuex";
 import Swal from "sweetalert2";
 import { useRoute, useRouter } from "vue-router";
 import useVuelidate from '@vuelidate/core';
-import { required, email, minLength, maxLength, numeric } from '@vuelidate/validators';
+import { required, email, minLength, maxLength, numeric, sameAs } from '@vuelidate/validators';
 import { helpers } from '@vuelidate/validators';
 const digitsOnlyValidator = helpers.withMessage(
     'Неверный формат номера телефона',
@@ -84,7 +84,7 @@ const maxLengthWithoutSpaces = (max) => (value) => {
     return !value || value.replace(/\s/g, '').length <= max;
 };
 
-
+const showPassword = ref(false)
 const rules = {
     first_name: { required },
     last_name: { required },
@@ -101,7 +101,12 @@ const rules = {
         required: helpers.withMessage('Поле обязательно для заполнения', required),
         digitsOnlyValidator
     },
-    additional_phone_number: { numeric },
+    password: { },
+    confirm_password: {
+        // required: helpers.withMessage('Подтвердите пароль', required),
+        sameAsPassword: sameAs(computed(() => form.value.password)),
+    },
+    additional_phone_number: { },
     email: { email },
     telegram_username: {},
     region: {},
@@ -165,6 +170,90 @@ watch(
     (currentValue) => currentValue
 );
 
+function translate(text) {
+    const translations = {
+        first_name: "Имя",
+        last_name: "Фамилия",
+        middle_name: "Отчество",
+        birth_date: "Дата рождения",
+        age: "Возраст",
+        gender: "Пол",
+        phone: "Телефон",
+        password: "Пароль",
+        additional_phone_number: "Дополнительный телефон",
+        email: "Электронная почта",
+        telegram_username: "Телеграм",
+        pinfl: "ПИНФЛ",
+        passport: "Паспорт",
+
+        // 📍 Адрес
+        region: "Регион",
+        district: "Район",
+        city: "Город",
+        mahalla: "Махалля",
+        street: "Улица",
+        building: "Дом",
+        latitude: "Широта",
+        longitude: "Долгота",
+
+        // 👥 Социальные и демографические данные
+        ethnicity: "Национальность",
+        social_group: "Социальная группа",
+        profession: "Профессия",
+        demographic_additional: "Дополнительные демографические данные",
+        additional_information: "Дополнительная информация",
+
+        // 📅 Прочее
+        date_joined: "Дата регистрации",
+        is_active: "Активен",
+        avatar: "Аватар",
+        // phone: "Телефон",
+        // birth_date: "Дата рождения",
+        // pinfl: "ПИНФЛ",
+        // age: "Возраст",
+        // gender: "Пол",
+        // phone: "Телефон",
+        // birth_date: "Дата рождения",
+        // pinfl: "ПИНФЛ",
+        // age: "Возраст",
+        // gender: "Пол",
+        // password: "Пароль",
+        // passport: "Паспорт",
+        // region: "Регион",
+        // district: "Район",
+        // "This field may not be blank.": "Это поле не может быть пустым.",
+        // "This field may not be null.": "Это поле не может быть пустым.",
+
+        // "Enter a valid email address.": "Введите корректный адрес электронной почты.",
+        // "Ensure this field has at least 14 characters.": "Минимальная длина — 14 символов.",
+        // "Ensure this field has no more than 14 characters.": "Максимальная длина — 14 символов.",
+        // "Invalid format.": "Неверный формат.",
+        // "This field is required.": "Это поле обязательно к заполнению.",
+        // "This field may not be blank.": "Это поле не может быть пустым.",
+        // "This field may not be null.": "Это поле не может быть пустым."
+
+        "Value is required": "Это поле обязательно для заполнения.",
+        "This field is required.": "Это поле обязательно для заполнения.",
+        "This field may not be blank.": "Это поле не может быть пустым.",
+        "This field may not be null.": "Это поле не может быть пустым.",
+        "Enter a valid email address.": "Введите корректный адрес электронной почты.",
+        "Invalid format.": "Неверный формат.",
+        "Invalid value": "Недопустимое значение.",
+        "Invalid input": "Неверный ввод.",
+        "Value is required Value is required": "Это поле обязательно для заполнения.",
+        "Value must be numeric": "Значение должно быть числом.",
+        "Value must be a valid number": "Введите корректное число.",
+        "Value is too short": "Слишком короткое значение.",
+        "Value is too long": "Слишком длинное значение.",
+        "Ensure this field has at least 14 characters.": "Минимальная длина — 14 символов.",
+        "Ensure this field has no more than 14 characters.": "Максимальная длина — 14 символов.",
+        "Ensure this field has at least 6 characters.": "Минимальная длина — 6 символов.",
+        "Ensure this field has no more than 6 characters.": "Максимальная длина — 6 символов."
+    };
+    return translations[text] || text;
+}
+
+
 const getEditInstance = async () => {
     try {
         const response = await axiosInstance.get(`/patients/${route.params.id}/`);
@@ -192,6 +281,8 @@ const handleSubmit = async () => {
         form.value.phone = form.value.phone.replace(/[\s()-]/g, "");
         form.value.additional_phone_number = form.value.additional_phone_number.replace(/[\s()-]/g, "");
         form.value.passport = form.value.passport.replace(/[\s()-]/g, '');
+        delete form.value.confirm_password
+        if(!form.value.password) delete form.value.password
 
         const responsePatient = await axiosInstance.put(`/patients/${route.params.id}/`, form.value);
 
@@ -236,11 +327,36 @@ const handleSubmit = async () => {
 
         }
     } catch (error) {
-        Swal.fire({
-            title: "Ошибка",
-            text: "Произошла ошибка при выполнении операции",
+        // Swal.fire({
+        //     title: "Ошибка",
+        //     text: "Произошла ошибка при выполнении операции",
+        //     icon: "error"
+        // });
+        
+        if (error.response && error.response.data) {
+            const errors = error.response.data;
+            let errorMessage = "<div style='text-align:left;'>";
+
+            for (const [key, value] of Object.entries(errors)) {
+            const translatedField = translate(key);
+            const translatedMessage = translate(value[0]);
+            errorMessage += `<p><strong>${translatedField}:</strong> ${translatedMessage}</p>`;
+            }
+
+            errorMessage += "</div>";
+
+            Swal.fire({
+            title: "Ошибка валидации",
+            html: errorMessage,
             icon: "error"
-        });
+            });
+        } else {
+            Swal.fire({
+            title: "Ошибка",
+            text: "Не удалось сохранить данные. Попробуйте позже.",
+            icon: "error"
+            });
+        }
     }
 };
 
@@ -348,7 +464,7 @@ onMounted(async () => {
                                         <BRow>
                                             <BCol sm="4">
                                                 <div class="mb-3">
-                                                    <label>{{ $t('birth_date') }}</label>
+                                                    <label>{{ $t('birth_date') }} <span class="required_field">*</span></label>
                                                     <div class="input-group">
                                                         <span class="input-group-text"><i
                                                                 class="ri-calendar-event-line"></i></span>
@@ -362,7 +478,7 @@ onMounted(async () => {
                                                     </div>
                                                 </div>
                                             </BCol>
-                                            <BCol sm="4">
+                                            <!-- <BCol sm="4">
                                                 <div class="mb-3">
                                                     <label class="form-label">ПИНФЛ</label>
                                                     <input v-model="form.pinfl" v-maska data-maska="##############"
@@ -372,11 +488,11 @@ onMounted(async () => {
                                                         Поле должно содержать 14 цифр
                                                     </div>
                                                 </div>
-                                            </BCol>
+                                            </BCol> -->
 
                                             <BCol sm="4">
                                                 <div class="mb-3">
-                                                    <label class="form-label">{{ $t('id_card') }}</label>
+                                                    <label class="form-label">{{ $t('id_card') }} <span class="required_field">*</span></label>
                                                     <input class="form-control" v-maska:[options]
                                                         data-maska="AA #######" data-maska-tokens="A:[A-Z]"
                                                         :class="{ 'is-invalid': v$.passport.$error }"
@@ -386,7 +502,58 @@ onMounted(async () => {
                                                     </div>
                                                 </div>
                                             </BCol>
+
+                                            <BCol sm="4">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Пароль
+                                                    </label>
+                                                    <div class="input-group">
+                                                    <input
+                                                        :type="showPassword ? 'text' : 'password'"
+                                                        v-model="form.password"
+                                                        class="form-control"
+                                                        :class="{ 'is-invalid': v$.password.$error }"
+                                                        placeholder="Введите пароль"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-outline-secondary"
+                                                        @click="showPassword = !showPassword"
+                                                        tabindex="-1"
+                                                    >
+                                                        <i :class="showPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                                                    </button>
+                                                    <div v-if="v$.password.$error" class="invalid-feedback">
+                                                        <div
+                                                        v-for="error in v$.password.$errors"
+                                                        :key="error.$uid"
+                                                        >
+                                                        {{ error.$message }}
+                                                        </div>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                            </BCol>
+    
+                                            <BCol sm="4">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Повторите пароль</label>
+                                                    <input
+                                                        v-model="form.confirm_password"
+                                                        :type="showPassword ? 'text' : 'password'"
+                                                        class="form-control"
+                                                        :class="{ 'is-invalid': v$.confirm_password.$error }"
+                                                        placeholder="Повторите пароль"
+                                                    />
+                                                    <div v-if="v$.confirm_password.$error" class="invalid-feedback">
+                                                        <div v-for="error in v$.confirm_password.$errors" :key="error.$uid">
+                                                            {{ error.$message }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </BCol>
                                         </BRow>
+
 
                                         <BRow>
 
