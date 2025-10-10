@@ -115,7 +115,7 @@ const admissionDataForm = ref({
 });
 const rules = computed(() => ({
   admission_date: { required },
-  hospitalization_date: { required },
+  hospitalization_date: { },
   hospitalization_type: { required },
   patient_condition: { required },
 }));
@@ -376,14 +376,14 @@ watch(
               <BRow class="mt-3">
                 <BCol sm="4">
                   <div class="mb-3">
-                    <label class="form-label fw-bold">Дата госпитализации</label>
+                    <label class="form-label fw-bold">Время выполнения ЧКВ</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="ri-calendar-event-line"></i></span>
                       <flat-pickr placeholder="Выберите дату" v-model="admissionDataForm.hospitalization_date
                         " :config="DateConfig" class="form-control flatpickr-input"
                         id="caledate"></flat-pickr>
-                      <span class="text-danger" v-if="v$.hospitalization_date.$error">Дата госпитализации
-                        обязательна</span>
+                      <!-- <span class="text-danger" v-if="v$.hospitalization_date.$error">Дата госпитализации
+                        обязательна</span> -->
 
                     </div>
                   </div>
