@@ -115,13 +115,14 @@ export const actions = {
       console.error(error);
     }
   },
-  fetchPatient: async ({ commit }, { active, search, order }) => {
+  fetchPatient: async ({ commit }, { active, search, order, without_or_archived_er_card }) => {
     try {
       const response = await axiosInstance.get("/patients/?limit=5", {
         params: {
           has_active_ercard: active,
           search: search,
           ordering: order,
+          // ...(without_or_archived_er_card !== undefined && {without_or_archived_er_card })
         },
       });
       commit("setPatient", response.data); // Используйте мутацию setPatients для обновления состояния

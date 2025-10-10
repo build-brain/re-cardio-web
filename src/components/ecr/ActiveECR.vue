@@ -347,7 +347,7 @@ export default {
                 clearTimeout(this.debounceTimer);
             }
             this.debounceTimer = setTimeout(() => {
-                this.fetchPatient({ active: false, search: this.searchQuery.trim() });
+                this.fetchPatient({ active: true, without_or_archived_er_card: true, search: this.searchQuery.trim() });
             }, 300);
         },
         toggleModal() {
@@ -403,7 +403,7 @@ export default {
                 await axiosInstance.post(`/er-cards/${this.er_card}/archivation/`, payload);
 
                 await this.fetchEcr({ page: this.page, active: true, search_active: this.search });
-                await this.fetchPatient({ active: false, search: this.searchQuery, order: "-created_at" });
+                await this.fetchPatient({ active: true, without_or_archived_er_card: true, search: this.searchQuery, order: "-created_at" });
                 this.modal = false;
                 Swal.fire({
                     icon: 'success',
@@ -425,7 +425,7 @@ export default {
         this.fetchEcr({ page: this.page, active: true, search_active: this.search });
 
         await this.getDoctor();
-        this.fetchPatient({ active: false, search: this.searchQuery, order: "-created_at" });
+        this.fetchPatient({ active: true, search: this.searchQuery, without_or_archived_er_card: true, order: "-created_at" });
     },
     components: {
 
