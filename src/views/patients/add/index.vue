@@ -63,6 +63,7 @@ const form = ref({
     demographic_additional: "",
     additional_information: "",
     avatar: null,
+    password: "",
 });
 const calculatedAge = computed(() => {
     if (!form.value.birth_date) return null;
@@ -87,13 +88,12 @@ const maxLengthWithoutSpaces = (max) => (value) => {
     return !value || value.replace(/\s/g, '').length <= max;
 };
 
-
 const rules = {
     first_name: { required },
     last_name: { required },
     middle_name: {},
-    birth_date: { },
-    pinfl: { required, minLength: minLength(14), maxLength: maxLength(14), numeric },
+    birth_date: { required, minLength: minLength(6) },
+    // pinfl: { required, minLength: minLength(14), maxLength: maxLength(14), numeric },
     passport: { required, maxLengthWithoutSpaces: maxLengthWithoutSpaces(9) },
     age: { numeric },
     gender: { required },
@@ -103,8 +103,19 @@ const rules = {
     phone: { 
         required: helpers.withMessage('Поле обязательно для заполнения', required), 
         digitsOnlyValidator
-      },
-    additional_phone_number: { digitsOnlyValidator },
+    },
+    password: { required },
+    // additional_phone_number: { required: false, digitsOnlyValidator },
+    additional_phone_number: {
+        // digitsOnlyValidator: helpers.withMessage(
+        // 'Поле должно содержать только цифры',
+        //     (value) => {
+        //         if (!value) return true // если ничего не введено — ок (поле опциональное)
+        //         const cleaned = value.replace(/\D/g, '') // убираем всё, кроме цифр
+        //         return /^\d+$/.test(cleaned)
+        //     }
+        // ),
+    },
     email: { email },
     telegram_username: {},
     region: {},
@@ -180,13 +191,80 @@ const resetFormData = () => {
 };
 function translate(text) {
     const translations = {
-        phone: "Телефон",
+        first_name: "Имя",
+        last_name: "Фамилия",
+        middle_name: "Отчество",
         birth_date: "Дата рождения",
-        pinfl: "ПИНФЛ",
         age: "Возраст",
         gender: "Пол",
+        phone: "Телефон",
+        password: "Пароль",
+        additional_phone_number: "Дополнительный телефон",
+        email: "Электронная почта",
+        telegram_username: "Телеграм",
+        pinfl: "ПИНФЛ",
+        passport: "Паспорт",
+
+        // 📍 Адрес
+        region: "Регион",
+        district: "Район",
+        city: "Город",
+        mahalla: "Махалля",
+        street: "Улица",
+        building: "Дом",
+        latitude: "Широта",
+        longitude: "Долгота",
+
+        // 👥 Социальные и демографические данные
+        ethnicity: "Национальность",
+        social_group: "Социальная группа",
+        profession: "Профессия",
+        demographic_additional: "Дополнительные демографические данные",
+        additional_information: "Дополнительная информация",
+
+        // 📅 Прочее
+        date_joined: "Дата регистрации",
+        is_active: "Активен",
+        avatar: "Аватар",
+        // phone: "Телефон",
+        // birth_date: "Дата рождения",
+        // pinfl: "ПИНФЛ",
+        // age: "Возраст",
+        // gender: "Пол",
+        // phone: "Телефон",
+        // birth_date: "Дата рождения",
+        // pinfl: "ПИНФЛ",
+        // age: "Возраст",
+        // gender: "Пол",
+        // password: "Пароль",
+        // passport: "Паспорт",
+        // region: "Регион",
+        // district: "Район",
+        // "This field may not be blank.": "Это поле не может быть пустым.",
+        // "This field may not be null.": "Это поле не может быть пустым.",
+
+        // "Enter a valid email address.": "Введите корректный адрес электронной почты.",
+        // "Ensure this field has at least 14 characters.": "Минимальная длина — 14 символов.",
+        // "Ensure this field has no more than 14 characters.": "Максимальная длина — 14 символов.",
+        // "Invalid format.": "Неверный формат.",
+        // "This field is required.": "Это поле обязательно к заполнению.",
+        // "This field may not be blank.": "Это поле не может быть пустым.",
+        // "This field may not be null.": "Это поле не может быть пустым."
+
+        "Value is required": "Это поле обязательно для заполнения.",
         "This field may not be blank.": "Это поле не может быть пустым.",
-        "This field may not be null.": "Это поле не может быть пустым."
+        "This field may not be null.": "Это поле не может быть пустым.",
+        "Enter a valid email address.": "Введите корректный адрес электронной почты.",
+        "Invalid format.": "Неверный формат.",
+        "Invalid value": "Недопустимое значение.",
+        "Invalid input": "Неверный ввод.",
+        "Value is required Value is required": "Это поле обязательно для заполнения.",
+        "Value must be numeric": "Значение должно быть числом.",
+        "Value must be a valid number": "Введите корректное число.",
+        "Value is too short": "Слишком короткое значение.",
+        "Value is too long": "Слишком длинное значение.",
+        "Ensure this field has at least 14 characters.": "Минимальная длина — 14 символов.",
+        "Ensure this field has no more than 14 characters.": "Максимальная длина — 14 символов."
     };
     return translations[text] || text;
 }
@@ -197,12 +275,39 @@ const handleSubmi1 = (async () => {
         console.log(form.value.phone, form.value.additional_phone_number);
 
     if (v$.value.$invalid) {
+        v$.value.$touch();
+
+        // Собираем все ошибки
+        let errorMessage = "<div style='text-align:left;'>";
+
+        // Перебираем все поля валидации
+        for (const key in v$.value) {
+            const field = v$.value[key];
+                if (field?.$errors?.length) {
+                const fieldName = translate(key); // используем твою translate-функцию
+                const messages = field.$errors.map(err => {
+                    return translate(err.$message) ? translate(err.$message) : err.$message
+                } 
+            ).join(", ");
+                errorMessage += `<p><strong>${fieldName}:</strong> ${messages}</p>`;
+            }
+        }
+
+        errorMessage += "</div>";
+
         Swal.fire({
             title: "Ошибка валидации",
-            text: "Пожалуйста, исправьте ошибки в форме перед отправкой.",
+            html: errorMessage,
             icon: "error"
         });
+
         return;
+        // Swal.fire({
+        //     title: "Ошибка валидации",
+        //     text: "Пожалуйста, исправьте ошибки в форме перед отправкой.",
+        //     icon: "error"
+        // });
+        // return;
     }
     try {
         form.value.phone = form.value.phone.replace(/[\s()-]/g, "");
@@ -245,20 +350,44 @@ const handleSubmi1 = (async () => {
         }
 
     } catch (error) {
+        // if (error.response && error.response.data) {
+        //     let errorMessage = "<div>";
+        //     for (const key in error.response.data) {
+        //         if (key in error.response.data) {
+        //             errorMessage += `<p class="fs-8">${translate(key)}: ${translate(error.response.data[key][0])}</p>`;
+        //         }
+        //     }
+        //     errorMessage += "</div>";
+        //     Swal.fire({
+        //         title: "Ошибка валидации",
+        //         html: errorMessage,
+        //         icon: "error"
+        //     });
+        // }
         if (error.response && error.response.data) {
-            let errorMessage = "<div>";
-            for (const key in error.response.data) {
-                if (key in error.response.data) {
-                    errorMessage += `<p class="fs-8">${translate(key)}: ${translate(error.response.data[key][0])}</p>`;
-                }
-            }
-            errorMessage += "</div>";
-            Swal.fire({
-                title: "Ошибка валидации",
-                html: errorMessage,
-                icon: "error"
-            });
-        }
+    const errors = error.response.data;
+    let errorMessage = "<div style='text-align:left;'>";
+
+    for (const [key, value] of Object.entries(errors)) {
+      const translatedField = translate(key);
+      const translatedMessage = translate(value[0]);
+      errorMessage += `<p><strong>${translatedField}:</strong> ${translatedMessage}</p>`;
+    }
+
+    errorMessage += "</div>";
+
+    Swal.fire({
+      title: "Ошибка валидации",
+      html: errorMessage,
+      icon: "error"
+    });
+  } else {
+    Swal.fire({
+      title: "Ошибка",
+      text: "Не удалось сохранить данные. Попробуйте позже.",
+      icon: "error"
+    });
+  }
     }
 
 
@@ -335,7 +464,7 @@ const options = {
                                             <BRow>
                                                 <BCol sm="4">
                                                     <div class="mb-3">
-                                                        <label>{{ $t('birth_date') }}</label>
+                                                        <label>{{ $t('birth_date') }} <span class="required_field">*</span></label>
                                                         <div class="input-group">
                                                             <span class="input-group-text"><i
                                                                     class="ri-calendar-event-line"></i></span>
@@ -343,13 +472,13 @@ const options = {
                                                                 v-model="form.birth_date" :config="DateConfig"
                                                                 :class="['form-control', { 'is-invalid': v$.birth_date.$error }]"
                                                                 id="caledate"></flat-pickr>
-                                                            <!-- <div v-if="v$.birth_date.$error" class="invalid-feedback">
+                                                            <div v-if="v$.birth_date.$error" class="invalid-feedback">
                                                                 Поле обязательное для заполнения
-                                                            </div> -->
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </BCol>
-                                                <BCol sm="4">
+                                                <!-- <BCol sm="4">
                                                     <div class="mb-3">
                                                         <label class="form-label">ПИНФЛ</label>
                                                         <input v-model="form.pinfl" v-maska data-maska="##############"
@@ -359,17 +488,30 @@ const options = {
                                                             Поле должно содержать 14 цифр
                                                         </div>
                                                     </div>
-                                                </BCol>
+                                                </BCol> -->
 
                                                 <BCol sm="4">
                                                     <div class="mb-3">
-                                                        <label class="form-label">{{ $t('id_card') }}</label>
+                                                        <label class="form-label">{{ $t('id_card') }} <span class="required_field">*</span></label>
                                                         <input class="form-control" v-maska:[options]
                                                             data-maska="AA #######" data-maska-tokens="A:[A-Z]"
                                                             :class="{ 'is-invalid': v$.passport.$error }"
                                                             placeholder="AA #######" v-model="form.passport" />
                                                         <div v-if="v$.passport.$error" class="invalid-feedback">
                                                             Поле должно содержать максимум 9 символов
+                                                        </div>
+                                                    </div>
+                                                </BCol>
+
+                                                
+                                                <BCol sm="4">
+                                                    <div class="mb-3">
+                                                        <label for="password" class="form-label">Пароль<span class="required_field">*</span></label>
+                                                        <input v-model="form.password" type="text"
+                                                            :class="['form-control', { 'is-invalid': v$.password?.$error }]"
+                                                            id="password" placeholder="Введите пароль" />
+                                                        <div v-if="v$.password?.$error" class="invalid-feedback">
+                                                            Поле обязательное для заполнения
                                                         </div>
                                                     </div>
                                                 </BCol>
@@ -643,7 +785,12 @@ const options = {
                                     $t('demog_contact.additional_contact') }}</label>
                                                             <input v-model="form.additional_phone_number" type="text"
                                                                 class="form-control" placeholder="+998 (___) ___-__-__"
-                                                                v-maska data-maska="+998 (##) ###-##-##" />
+                                                                v-maska data-maska="+998 (##) ###-##-##" :class="{ 'is-invalid': v$.additional_phone_number.$error }" />
+                                                                <div v-if="v$.additional_phone_number.$error" class="invalid-feedback">
+                                                                    <div v-for="error in v$.additional_phone_number.$errors" :key="error.$message">
+                                                                        {{ error.$message }} 
+                                                                    </div>
+                                                                </div>
                                                         </div>
                                                     </div>
                                                 </BCol>
