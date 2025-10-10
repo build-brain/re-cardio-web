@@ -306,20 +306,94 @@ const getICD = async () => {
     await store.dispatch('patients/getICD');
     await store.dispatch('ecr/fetchComplication');
 };
-
+const backendMessageMap = {
+    "Value is required": "Это поле обязательно для заполнения.",
+    "This field is required.": "Это поле обязательно для заполнения.",
+    "This field may not be blank.": "Это поле не может быть пустым.",
+    "This field may not be null.": "Это поле не может быть пустым.",
+    "Enter a valid email address.": "Введите корректный адрес электронной почты.",
+    "Invalid format.": "Неверный формат.",
+    "Invalid value": "Недопустимое значение.",
+    "Invalid input": "Неверный ввод.",
+    "Value is required Value is required": "Это поле обязательно для заполнения.",
+    "Value must be numeric": "Значение должно быть числом.",
+    "Value must be a valid number": "Введите корректное число.",
+    "Value is too short": "Слишком короткое значение.",
+    "Value is too long": "Слишком длинное значение.",
+    "Ensure this field has at least 14 characters.": "Минимальная длина — 14 символов.",
+    "Ensure this field has no more than 14 characters.": "Максимальная длина — 14 символов.",
+    "Ensure this field has at least 6 characters.": "Минимальная длина — 6 символов.",
+    "Ensure this field has no more than 6 characters.": "Максимальная длина — 6 символов."
+};
 const onHandlesubmit = async () => {
 
     v$.value.$touch();
-    if (v$.value.$invalid) {
+    // if (v$.value.$invalid) {
+    //     Swal.fire({
+    //         title: "Ошибка валидации!",
+    //         text: "Исправьте все ошибки!",
+    //         icon: "error",
+    //         timer: 2500,
+    //         timerProgressBar: true
+    //     });
+    //     return;
+    // }
+    const isValid = await v$.value.$validate();
+
+    if (!isValid) {
+        // Собираем все ошибки из Vuelidate
+        const errors = [];
+
+        // Проходим по всем полям, где есть ошибки
+        for (const [field, validation] of Object.entries(v$.value)) {
+        if (validation?.$errors?.length) {
+            validation.$errors.forEach((err) => {
+            // Добавляем человекопонятное имя поля
+            const fieldName = {
+                examination_date: "Дата осмотра",
+                weight: "Вес",
+                height: "Рост",
+                body_mass_index: "Индекс массы тела",
+                body_temperature: "Температура тела",
+                systolic_pressure: "Систолическое давление",
+                diastolic_pressure: "Диастолическое давление",
+                pulse: "Пульс",
+                creatinine: "Креатинин",
+                troponin: "Тропонин",
+                coronary_insufficiency: "Коронарная недостаточность",
+                ami_localization: "Локализация ИМ",
+                mi_type: "Тип ИМ",
+                myocardium_damage: "Поражение миокарда",
+                acs_characteristics: "Характеристика ОКС",
+                issue_date: "Дата выдачи",
+                anxiety_level: "Уровень тревоги",
+                depression_level: "Уровень депрессии",
+                complications: "Осложнения",
+            }[field] || field;
+
+            // Добавляем сообщение об ошибке
+            errors.push(`${fieldName}: ${backendMessageMap?.[err.$message] ?? err.$message}`);
+            });
+        }
+        }
+
+        // Показываем список ошибок в SweetAlert
         Swal.fire({
-            title: "Ошибка валидации!",
-            text: "Исправьте все ошибки!",
-            icon: "error",
-            timer: 2500,
-            timerProgressBar: true
+        title: "Ошибка валидации!",
+        html: `
+            <div style="text-align: left">
+            <ul style="padding-left: 20px; margin: 0;">
+                ${errors.map((e) => `<li>${e}</li>`).join("")}
+            </ul>
+            </div>
+        `,
+        icon: "error",
+        confirmButtonText: "Понятно"
         });
+
         return;
     }
+
     try {
         const response = await axiosInstance.put(`/ca-sheets/${route.params.id}/`, ca_sheets.value);
         if (response.status === 200) {

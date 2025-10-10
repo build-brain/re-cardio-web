@@ -750,12 +750,21 @@ onMounted(async () => {
                     <BCard>
                         <BCardHeader class="d-flex justify-content-between p-0 mb-2">
                             <h3>Лист оценки состояния пациента</h3>
-                            <router-link :to="`/ecr/list-add-ecr-patients/${$route.params.id}/`" v-if="ECR === null">
-                                <button type="button" class="btn bg-primary btn-sm ms-auto bg-opacity-10">
+                            <template v-if="admission_data !== null">
+                                <router-link :to="`/ecr/list-add-ecr-patients/${$route.params.id}/`" v-if="ECR === null">
+                                    <button type="button" class="btn bg-primary btn-sm ms-auto bg-opacity-10">
+                                        <i class="ri-edit-box-line text-primary align-bottom me-1"></i>
+                                        <span class="text-primary fw-bold text-opacity-100">Открыть</span>
+                                    </button>
+                                </router-link>
+                            </template>
+                            <div v-else title="Заполните данные при госпитализации">
+                                <button disabled type="button" class="btn bg-primary btn-sm ms-auto bg-opacity-10">
                                     <i class="ri-edit-box-line text-primary align-bottom me-1"></i>
                                     <span class="text-primary fw-bold text-opacity-100">Открыть</span>
                                 </button>
-                            </router-link>
+                            </div>
+
                             <router-link :to="`/ecr/edit-ecr/${$route.params.id}/`" v-if="ECR !== null">
                                 <button type="button" class="btn bg-primary btn-sm ms-auto bg-opacity-10">
                                     <i class="ri-eye-fill text-primary align-bottom me-1"></i>
