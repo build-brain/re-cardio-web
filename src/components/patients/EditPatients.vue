@@ -14,10 +14,20 @@ import { helpers } from '@vuelidate/validators';
 const digitsOnlyValidator = helpers.withMessage(
     'Неверный формат номера телефона',
     (value) => {
+        console.log(value);
+        
         if (!value) return false;
         const digitsCount = (value.match(/\d/g) || []).length;
         return digitsCount === 12;
     }
+);
+const optionaDigitsOnlyValidator = helpers.withMessage(
+  'Неверный формат номера телефона',
+  (value) => {
+    if (!value) return true;
+    const digitsCount = (value.match(/\d/g) || []).length;
+    return digitsCount === 12;
+  }
 );
 const store = useStore();
 const router = useRouter();
@@ -90,7 +100,7 @@ const rules = {
     last_name: { required },
     middle_name: {},
     birth_date: { },
-    pinfl: { required, minLength: minLength(14), maxLength: maxLength(14), numeric },
+    // pinfl: { required, minLength: minLength(14), maxLength: maxLength(14), numeric },
     passport: { required, maxLengthWithoutSpaces: maxLengthWithoutSpaces(9) },
     age: { required, numeric },
     gender: { required },
@@ -101,12 +111,14 @@ const rules = {
         required: helpers.withMessage('Поле обязательно для заполнения', required),
         digitsOnlyValidator
     },
-    password: { },
+    password: { minLength: minLength(6) },
     confirm_password: {
         // required: helpers.withMessage('Подтвердите пароль', required),
         sameAsPassword: sameAs(computed(() => form.value.password)),
     },
-    additional_phone_number: { },
+    additional_phone_number: {
+        digitsOnlyValidator: optionaDigitsOnlyValidator
+    },
     email: { email },
     telegram_username: {},
     region: {},
@@ -232,6 +244,9 @@ function translate(text) {
         // "This field may not be blank.": "Это поле не может быть пустым.",
         // "This field may not be null.": "Это поле не может быть пустым."
 
+        "This field should be at least 6 characters long": "Минимальная длина — 6 символов.",
+        "New password must be at least 6 characters long!": "Новый пароль должен быть длиной не менее 6 символов!",
+        "The value must be equal to the other value": "Пароли не совпадают",
         "Value is required": "Это поле обязательно для заполнения.",
         "This field is required.": "Это поле обязательно для заполнения.",
         "This field may not be blank.": "Это поле не может быть пустым.",
@@ -277,6 +292,38 @@ const getEditInstance = async () => {
 };
 
 const handleSubmit = async () => {
+    v$.value.$touch();
+
+    if (v$.value.$invalid) {
+        v$.value.$touch();
+
+        // Собираем все ошибки
+        let errorMessage = "<div style='text-align:left;'>";
+
+        // Перебираем все поля валидации
+        for (const key in v$.value) {
+            const field = v$.value[key];
+                if (field?.$errors?.length) {
+                const fieldName = translate(key); // используем твою translate-функцию
+                const messages = field.$errors.map(err => {
+                    return translate(err.$message) ? translate(err.$message) : err.$message
+                } 
+            ).join(", ");
+                errorMessage += `<p><strong>${fieldName}:</strong> ${messages}</p>`;
+            }
+        }
+
+        errorMessage += "</div>";
+
+        Swal.fire({
+            title: "Ошибка валидации",
+            html: errorMessage,
+            icon: "error"
+        });
+
+        return;
+    }
+
     try {
         form.value.phone = form.value.phone.replace(/[\s()-]/g, "");
         form.value.additional_phone_number = form.value.additional_phone_number.replace(/[\s()-]/g, "");
@@ -528,7 +575,7 @@ onMounted(async () => {
                                                         v-for="error in v$.password.$errors"
                                                         :key="error.$uid"
                                                         >
-                                                        {{ error.$message }}
+                                                        {{ translate(error.$message) ?? error.$message }}
                                                         </div>
                                                     </div>
                                                     </div>
@@ -547,7 +594,7 @@ onMounted(async () => {
                                                     />
                                                     <div v-if="v$.confirm_password.$error" class="invalid-feedback">
                                                         <div v-for="error in v$.confirm_password.$errors" :key="error.$uid">
-                                                            {{ error.$message }}
+                                                            {{ translate(error.$message) ?? error.$message }}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -817,7 +864,12 @@ onMounted(async () => {
                                 $t('demog_contact.additional_contact') }}</label>
                                                         <input v-model="form.additional_phone_number" type="text"
                                                             class="form-control" placeholder="+998 (___) ___-__-__"
-                                                            v-maska data-maska="+998 (##) ###-##-##" />
+                                                            v-maska data-maska="+998 (##) ###-##-##" :class="{ 'is-invalid': v$.additional_phone_number.$error }" />
+                                                            <div v-if="v$.additional_phone_number.$error"class="invalid-feedback">
+                                                                <div v-for="error in v$.additional_phone_number.$errors" :key="error.$message">
+                                                                    {{ translate(error.$message) ?? error.$message }} 
+                                                                </div>
+                                                            </div>
                                                     </div>
                                                 </div>
                                             </BCol>

@@ -21,6 +21,14 @@ const digitsOnlyValidator = helpers.withMessage(
     return digitsCount === 12;
   }
 );
+const optionaDigitsOnlyValidator = helpers.withMessage(
+  'Неверный формат номера телефона',
+  (value) => {
+    if (!value) return true;
+    const digitsCount = (value.match(/\d/g) || []).length;
+    return digitsCount === 12;
+  }
+);
 const store = useStore();
 
 
@@ -105,26 +113,14 @@ const rules = {
         required: helpers.withMessage('Поле обязательно для заполнения', required), 
         digitsOnlyValidator
     },
-    password: { required },
+    password: { required, minLength: minLength(6), },
     confirm_password: {
         required: helpers.withMessage('Подтвердите пароль', required),
-        sameAsPassword: sameAs(computed(() => form.value.password)),
-        // sameAsPassword: helpers.withMessage(
-        //     'Пароли не совпадают',
-        //     sameAs(() => form.value.password) 
-        // )
-        
+        sameAsPassword: sameAs(computed(() => form.value.password)),        
     },
     // additional_phone_number: { required: false, digitsOnlyValidator },
     additional_phone_number: {
-        // digitsOnlyValidator: helpers.withMessage(
-        // 'Поле должно содержать только цифры',
-        //     (value) => {
-        //         if (!value) return true // если ничего не введено — ок (поле опциональное)
-        //         const cleaned = value.replace(/\D/g, '') // убираем всё, кроме цифр
-        //         return /^\d+$/.test(cleaned)
-        //     }
-        // ),
+        digitsOnlyValidator: optionaDigitsOnlyValidator
     },
     email: { email },
     telegram_username: {},
@@ -262,6 +258,9 @@ function translate(text) {
         // "This field may not be blank.": "Это поле не может быть пустым.",
         // "This field may not be null.": "Это поле не может быть пустым."
 
+        "This field should be at least 6 characters long": "Минимальная длина — 6 символов.",
+        "New password must be at least 6 characters long!": "Новый пароль должен быть длиной не менее 6 символов!",
+        "The value must be equal to the other value": "Пароли не совпадают",
         "Value is required": "Это поле обязательно для заполнения.",
         "This field is required.": "Это поле обязательно для заполнения.",
         "This field may not be blank.": "Это поле не может быть пустым.",
@@ -316,12 +315,6 @@ const handleSubmi1 = (async () => {
         });
 
         return;
-        // Swal.fire({
-        //     title: "Ошибка валидации",
-        //     text: "Пожалуйста, исправьте ошибки в форме перед отправкой.",
-        //     icon: "error"
-        // });
-        // return;
     }
     try {
         form.value.phone = form.value.phone.replace(/[\s()-]/g, "");
@@ -574,7 +567,7 @@ const options = {
                                                         />
                                                         <div v-if="v$.confirm_password.$error" class="invalid-feedback">
                                                             <div v-for="error in v$.confirm_password.$errors" :key="error.$uid">
-                                                                {{ error.$message }}
+                                                                {{ translate(error.$message) ?? error.$message }}
                                                             </div>
                                                         </div>
                                                     </div>

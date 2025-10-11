@@ -602,11 +602,11 @@ onMounted(async () => {
 
                                                 <BRow>
 
-                                                    <div class="my-3">
+                                                    <div class="my-3 range-wrapper">
                                                         <label for="range-1" class="form-label fw-bold">Уровень
                                                             тревоги</label>
                                                         <div
-                                                            class="d-flex justify-content-between align-items-center text-muted px-2 w-100">
+                                                            class="d-flex justify-content-between align-items-center text-muted px-2 w-100 range-labels">
 
                                                             <span v-for="i in 21" :key="i"
                                                                 :class="{ 'text-primary fw-bold': ca_sheets.anxiety_level == i }">
@@ -615,7 +615,7 @@ onMounted(async () => {
                                                         </div>
                                                     
 
-                                                        <input class="form-range" v-model="ca_sheets.anxiety_level" :class="{ 'is-invalid': v$.anxiety_level.$error }"
+                                                        <input class="form-range range-input" v-model="ca_sheets.anxiety_level" :class="{ 'is-invalid': v$.anxiety_level.$error }"
                                                             type="range" min="1" max="21" />
                                                             <span class="text-danger"
                                                             v-if="v$.anxiety_level.$error">Обязательно</span>
@@ -1217,5 +1217,7 @@ onMounted(async () => {
 .custom-nav {
     display: none
 }
+
+
 </style>
 <style src="@vueform/multiselect/themes/default.css"></style>

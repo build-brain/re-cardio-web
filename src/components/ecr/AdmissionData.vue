@@ -128,16 +128,63 @@ export default {
 
         };
 
+        function translate(text) {
+            const translations = {
+                "admission_date": "Дата и время поступления",
+                "hospitalization_date": "Время выполнения ЧКВ",
+                "hospitalization_type": "Тип госпитализации",
+                "patient_condition": "Состояние пациента при поступлении",
+                "This field should be at least 6 characters long": "Минимальная длина — 6 символов.",
+                "New password must be at least 6 characters long!": "Новый пароль должен быть длиной не менее 6 символов!",
+                "The value must be equal to the other value": "Пароли не совпадают",
+                "Value is required": "Это поле обязательно для заполнения.",
+                "This field is required.": "Это поле обязательно для заполнения.",
+                "This field may not be blank.": "Это поле не может быть пустым.",
+                "This field may not be null.": "Это поле не может быть пустым.",
+                "Enter a valid email address.": "Введите корректный адрес электронной почты.",
+                "Invalid format.": "Неверный формат.",
+                "Invalid value": "Недопустимое значение.",
+                "Invalid input": "Неверный ввод.",
+                "Value is required Value is required": "Это поле обязательно для заполнения.",
+                "Value must be numeric": "Значение должно быть числом.",
+                "Value must be a valid number": "Введите корректное число.",
+                "Value is too short": "Слишком короткое значение.",
+                "Value is too long": "Слишком длинное значение.",
+                "Ensure this field has at least 14 characters.": "Минимальная длина — 14 символов.",
+                "Ensure this field has no more than 14 characters.": "Максимальная длина — 14 символов.",
+                "Ensure this field has at least 6 characters.": "Минимальная длина — 6 символов.",
+                "Ensure this field has no more than 6 characters.": "Максимальная длина — 6 символов."
+            };
+            return translations[text] || text;
+        }
+
         const handleSubmit = async () => {
             v$.value.$touch();
             if (v$.value.$invalid) {
+                v$.value.$touch();
+                    
+                let errorMessage = "<div style='text-align:left;'>";
+
+                for (const key in v$.value) {
+                    const field = v$.value[key];
+                        if (field?.$errors?.length) {
+                        const fieldName = translate(key); // используем твою translate-функцию
+                        const messages = field.$errors.map(err => {
+                            return translate(err.$message) ? translate(err.$message) : err.$message
+                        } 
+                    ).join(", ");
+                        errorMessage += `<p><strong>${fieldName}:</strong> ${messages}</p>`;
+                    }
+                }
+
+                errorMessage += "</div>";
+
                 Swal.fire({
-                    title: "Ошибка валидации!",
-                    text: "Исправьте все ошибки!",
-                    icon: "error",
-                    timer: 2500,
-                    timerProgressBar: true
+                    title: "Ошибка валидации",
+                    html: errorMessage,
+                    icon: "error"
                 });
+
                 return;
             }
 
@@ -185,14 +232,30 @@ export default {
                     });
                 }
             } catch (error) {
-                console.error(error);
+                if (error.response && error.response.data) {
+                    const errors = error.response.data;
+                    let errorMessage = "<div style='text-align:left;'>";
 
-                Swal.fire({
-                    title: "Ошибка",
-                    // text: `${error.message}`, // TODO: check translation
-                    text: `Ошибка при добавлении данных при госпитализации: ${error.message}`,
-                    icon: "error"
-                });
+                    for (const [key, value] of Object.entries(errors)) {
+                        const translatedField = translate(key);
+                        const translatedMessage = translate(value[0]);
+                        errorMessage += `<p><strong>${translatedField}:</strong> ${translatedMessage}</p>`;
+                    }
+
+                    errorMessage += "</div>";
+
+                    Swal.fire({
+                        title: "Ошибка валидации",
+                        html: errorMessage,
+                        icon: "error"
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Ошибка",
+                        text: "Не удалось сохранить данные. Попробуйте позже.",
+                        icon: "error"
+                    });
+                }
             } finally {
                 clearInterval(timerInterval);
             }
@@ -308,7 +371,7 @@ export default {
                     <BRow>
                         <BCol sm="4">
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Дата и время поступления</label>
+                                <label class="form-label fw-bold">Дата и время поступления <span class="required_field">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="ri-calendar-event-line"></i></span>
                                     <flat-pickr placeholder="Выбрать... " v-model="admissionDataForm.admission_date"
@@ -336,7 +399,7 @@ export default {
                         <BCol sm="4">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Состояние пациента при
-                                    поступлении</label>
+                                    поступлении <span class="required_field">*</span></label>
                                 <BFormSelect :class="{ 'is-invalid': v$.patient_condition.$error }"
                                     v-model="admissionDataForm.patient_condition" aria-label="Default select example">
                                     <BFormSelectOption :value="null" disabled>Выбрать...
@@ -358,7 +421,7 @@ export default {
                         </BCol>
                     </BRow>
                     <BRow class="mt-3">
-                        <BCol sm="4">
+                        <!-- <BCol sm="4">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Время выполнения ЧКВ</label>
                                 <div class="input-group">
@@ -366,15 +429,27 @@ export default {
                                     <flat-pickr placeholder="Выберите дату" v-model="admissionDataForm.hospitalization_date
                                         " :config="DateConfig" class="form-control flatpickr-input"
                                         id="caledate"></flat-pickr>
-                                    <!-- <span class="text-danger" v-if="v$.hospitalization_date.$error">Дата госпитализации
-                                        обязательна</span> -->
-
+                                    <span class="text-danger" v-if="v$.hospitalization_date?.$error">Дата госпитализации
+                                        обязательна</span>
+                                </div>
+                            </div>
+                        </BCol> -->
+                        <BCol sm="4">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Время выполнения ЧКВ</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="ri-time-line"></i></span>
+                                    <flat-pickr placeholder="Выбрать...  ч./мин." v-model="admissionDataForm.hospitalization_date
+                                        " :config="timeConfig" class="form-control flatpickr-input"
+                                        id="caledate"></flat-pickr>
+                                    <span class="text-danger" v-if="v$.hospitalization_date?.$error">Дата госпитализации
+                                        обязательна</span>
                                 </div>
                             </div>
                         </BCol>
                         <BCol sm="4">
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Тип госпитализации</label>
+                                <label class="form-label fw-bold">Тип госпитализации <span class="required_field">*</span></label>
                                 <BFormSelect v-model="admissionDataForm.hospitalization_type
                                         " :class="{ 'is-invalid': v$.patient_condition.$error }"
                                     aria-label="Default select example">

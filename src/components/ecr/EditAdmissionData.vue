@@ -147,7 +147,6 @@ const getAttachments = async () => {
   } catch (e) {
     Swal.fire({
       title: "Ошибка",
-      // text: `${e}`, // TODO: check translation
       text: `Ошибка при получении данных при госпитализации: ${e.message}`,
       icon: "error",
       timer: 2500,
@@ -374,7 +373,7 @@ watch(
                 </BCol>
               </BRow>
               <BRow class="mt-3">
-                <BCol sm="4">
+                <!-- <BCol sm="4">
                   <div class="mb-3">
                     <label class="form-label fw-bold">Время выполнения ЧКВ</label>
                     <div class="input-group">
@@ -382,9 +381,21 @@ watch(
                       <flat-pickr placeholder="Выберите дату" v-model="admissionDataForm.hospitalization_date
                         " :config="DateConfig" class="form-control flatpickr-input"
                         id="caledate"></flat-pickr>
-                      <!-- <span class="text-danger" v-if="v$.hospitalization_date.$error">Дата госпитализации
-                        обязательна</span> -->
+                      <span class="text-danger" v-if="v$.hospitalization_date.$error">Дата госпитализации
+                        обязательна</span>
 
+                    </div>
+                  </div>
+                </BCol> -->
+                <BCol sm="4">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Время выполнения ЧКВ</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="ri-time-line"></i></span>
+                      <flat-pickr placeholder="Выбрать...  ч./мин." v-model="admissionDataForm.hospitalization_date
+                        " :config="timeConfig" class="form-control flatpickr-input"
+                        id="caledate"></flat-pickr>
+                      <span class="text-danger" v-if="v$.hospitalization_date?.$error">Дата госпитализации обязательна</span>
                     </div>
                   </div>
                 </BCol>
