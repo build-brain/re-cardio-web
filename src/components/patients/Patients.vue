@@ -12,10 +12,12 @@ import { axiosInstance } from '../../axios'
 import Swal from "sweetalert2";
 import { mapState, mapActions, mapMutations } from 'vuex';
 import * as XLSX from 'xlsx';
+import debounce from 'lodash/debounce'
 
 export default {
   data() {
     return {
+      debounceTimer: null,
       createAppModal: false,
       date: null,
       countries: [],
@@ -192,8 +194,10 @@ export default {
 
     async changecategory(data) {
       this.statuscategory = data;
+      this.page = 1;
       try {
         await this.fetchPatients({
+          page: this.page,
           active: data
         });
       } catch (error) {
@@ -222,6 +226,15 @@ export default {
       const direction = this.direction === 'asc' ? 'desc' : 'asc';
       this.sortPatients({ column, direction });
       this.direction = direction;
+    },
+    onSearchInput() {
+      // сбрасываем предыдущий таймер
+      clearTimeout(this.debounceTimer);
+
+      // ставим новый с задержкой 500 мс
+      this.debounceTimer = setTimeout(() => {
+        this.onSearch();
+      }, 500);
     },
     async onSearch() {
       const [after, before] = this.date_birth.split(' — ').map(date => date.trim() || null);
@@ -335,7 +348,7 @@ export default {
               <BCol xxl="4" sm="6">
                 <div class="search-box">
                   <input v-model="search" type="search" class="form-control search" placeholder="Поиск..."
-                    @input="onSearch" /><i class="ri-search-line search-icon"></i>
+                    @input="onSearchInput" /><i class="ri-search-line search-icon"></i>
                 </div>
               </BCol>
               <BCol xxl="2" sm="6">

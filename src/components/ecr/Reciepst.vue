@@ -416,6 +416,7 @@ const updateMedicine = async () => {
             if (medIndex !== -1) {
                 prescription.medicines[medIndex] = response.data;
             }
+            v$.value.$reset();
             showEditMedicineModal.value = false;
             Swal.fire({
                 title: "Успешно",
@@ -512,8 +513,10 @@ const addMedicineToPrescription = async () => {
                 dose: null,
                 schedule: [],
                 course: null,
-                decsription: ''
+                decsription: '',
+                takings: [],
             };
+            v$.value.$reset();
 
             // Show success message
             Swal.fire({
