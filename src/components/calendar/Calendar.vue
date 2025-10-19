@@ -22,6 +22,15 @@ import useVuelidate from "@vuelidate/core";
 import Layout from "@/layouts/main.vue";
 import PageHeader from "@/components/page-header.vue";
 
+const translations = {
+  title: "Название",
+  category: "Тип события",
+  location: "Локация",
+  er_card: "Пациент",
+  start_datetime: "Начало даты",
+  end_datetime: "Конец даты",
+}
+
 export default {
   setup() {
     return { v$: useVuelidate() };
@@ -318,9 +327,27 @@ export default {
     handleSubmit(e) {
       this.submitted = true;
 
-      this.v$.$touch(); // Обозначаем поля как тронутые
-      if (this.v$.$invalid) {
-        // Обработка ошибок
+      this.v$.$touch();
+
+      if (this.v$.event.$invalid) {
+        let errorMessage = "<div style='text-align:left;'>";
+
+        for (const key in this.v$.event) {
+          const field = this.v$.event[key];
+          if (field?.$errors?.length) {
+            const messages = field.$errors.map(err => err.$message).join(", ");
+            errorMessage += `<p><strong>${translations[key]}:</strong> ${messages}</p>`;
+          }
+        }
+
+        errorMessage += "</div>";
+
+        Swal.fire({
+          title: "Ошибка валидации",
+          html: errorMessage,
+          icon: "error"
+        });
+
         return;
       }
 
@@ -472,6 +499,8 @@ export default {
      */
     editEvent(info) {
       this.edit = info.event;
+      // TODO: add debounce to search patient
+      // TODO: fix edit event
 
       this.editevent.editTitle = this.edit.title;
       const category = Array.isArray(this.edit.classNames) ? this.edit.classNames[0] : this.edit.classNames;
