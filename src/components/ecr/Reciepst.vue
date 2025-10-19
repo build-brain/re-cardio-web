@@ -512,7 +512,6 @@ const addMedicineToPrescription = async () => {
                 name: '',
                 dose: null,
                 schedule: [],
-                course: null,
                 decsription: '',
                 takings: [],
             };

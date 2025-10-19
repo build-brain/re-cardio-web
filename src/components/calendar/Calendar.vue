@@ -83,6 +83,7 @@ export default {
       events: [],
       selectedCountries: [],
       countries: [],
+      clientSearchTimeout: null,
       emptyMessage: "Нет вариантов",
       isLoading: false,
       calendarOptions: {
@@ -231,16 +232,20 @@ export default {
   methods: {
     ...mapActions('ecr', ['fetchEvents']),
     asyncFind(query) {
-      this.isLoading = true;
-      axiosInstance.get(`/patients/?search=${query}`).then(response => {
-        this.countries = response.data.results.map(item => ({
-          value: item.active_ercard_id,
-          label: `${item.first_name} ${item.last_name} ${item.middle_name}`
-        }));
-        this.isLoading = false;
-      }).catch(error => {
-        this.isLoading = false;
-      });
+      clearTimeout(this.clientSearchTimeout);
+
+      this.clientSearchTimeout = setTimeout(() => {
+        this.isLoading = true;
+        axiosInstance.get(`/patients/?search=${query}`).then(response => {
+          this.countries = response.data.results.map(item => ({
+            value: item.active_ercard_id,
+            label: `${item.first_name} ${item.last_name} ${item.middle_name}`
+          }));
+          this.isLoading = false;
+        }).catch(error => {
+          this.isLoading = false;
+        });
+      }, 400)
     },
 
     clearAll() {
@@ -440,7 +445,7 @@ export default {
 
       axiosInstance.put(`/events/${this.edit.id}/`, eventDataForServer)
         .then(response => {
-          this.edit.setProp("title", editTitle);
+          this.edit.setProp("title", `${response?.data?.patient_first_name} ${response?.data?.patient_last_name??''} ${response?.data?.atient_middle_name??''}`);
           this.edit.setProp("classNames", editcategory);
           this.edit.setStart(startDate);
           this.edit.setEnd(endDate);
@@ -498,18 +503,20 @@ export default {
      * Modal open for edit event
      */
     editEvent(info) {
+      const ev = info.event?._def?.extendedProps?.data
       this.edit = info.event;
-      // TODO: add debounce to search patient
       // TODO: fix edit event
+      console.log(this.edit);
+      
 
-      this.editevent.editTitle = this.edit.title;
+      this.editevent.editTitle = ev.title;
       const category = Array.isArray(this.edit.classNames) ? this.edit.classNames[0] : this.edit.classNames;
 
       this.editevent.editcategory = category;
 
-      this.editevent.editlocation = this.edit.extendedProps.location;
-      this.editevent.editdescri = this.edit.extendedProps.description;
-      this.editevent.editer_card = this.edit.extendedProps.er_card;
+      this.editevent.editlocation = ev.location;
+      this.editevent.editdescri = ev.description;
+      this.editevent.editer_card = ev.er_card;
       this.editevent.start_datetime = this.edit.start;
       this.editevent.end_datetime = this.edit.end;
 

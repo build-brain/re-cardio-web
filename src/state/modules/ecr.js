@@ -196,6 +196,7 @@ export const actions = {
             patient_first_name: event.patient_first_name,
             patient_last_name: event.patient_last_name,
             patient_middle_name: event.patient_middle_name,
+            data: event
           },
           er_card: event.er_card,
         };
