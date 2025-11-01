@@ -198,7 +198,8 @@ export default {
       try {
         await this.fetchPatients({
           page: this.page,
-          active: data
+          active: data,
+          search: this.search,
         });
       } catch (error) {
 
@@ -208,7 +209,8 @@ export default {
     async changecategory2(data) {
       try {
         await this.fetchPatients({
-          with_active: data
+          with_active: data,
+          search: this.search,
         });
       } catch (error) {
 
