@@ -105,7 +105,7 @@ const admissionDataForm = ref({
   patient_condition: null,
   patient_complaints: "",
   heart_stopped: false,
-  hospitalization_date: "",
+  pci_duration: "",
   hospitalization_type: null,
   diagnosed_by: null,
   additional_information: "",
@@ -115,7 +115,7 @@ const admissionDataForm = ref({
 });
 const rules = computed(() => ({
   admission_date: { required },
-  hospitalization_date: { },
+  pci_duration: { },
   hospitalization_type: { required },
   patient_condition: { required },
 }));
@@ -132,11 +132,11 @@ const getAttachments = async () => {
     // Set the form fields except for attachments
     admissionDataForm.value = {
       admission_date: data.admission_date,
-      delivery_time: data.delivery_time,
+      delivery_time: data.delivery_time?.replace(/^00:/, ''),
       patient_condition: data.patient_condition,
       patient_complaints: data.patient_complaints,
       heart_stopped: data.heart_stopped,
-      hospitalization_date: data.hospitalization_date,
+      pci_duration: data.pci_duration?.replace(/^00:/, ''),
       hospitalization_type: data.hospitalization_type,
       diagnosed_by: data.diagnosed_by,
       additional_information: data.additional_information,
@@ -378,10 +378,10 @@ watch(
                     <label class="form-label fw-bold">Время выполнения ЧКВ</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="ri-calendar-event-line"></i></span>
-                      <flat-pickr placeholder="Выберите дату" v-model="admissionDataForm.hospitalization_date
+                      <flat-pickr placeholder="Выберите дату" v-model="admissionDataForm.pci_duration
                         " :config="DateConfig" class="form-control flatpickr-input"
                         id="caledate"></flat-pickr>
-                      <span class="text-danger" v-if="v$.hospitalization_date.$error">Дата госпитализации
+                      <span class="text-danger" v-if="v$.pci_duration.$error">Дата госпитализации
                         обязательна</span>
 
                     </div>
@@ -392,10 +392,10 @@ watch(
                     <label class="form-label fw-bold">Время выполнения ЧКВ</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="ri-time-line"></i></span>
-                      <flat-pickr placeholder="Выбрать...  ч./мин." v-model="admissionDataForm.hospitalization_date
+                      <flat-pickr placeholder="Выбрать...  ч./мин." v-model="admissionDataForm.pci_duration
                         " :config="timeConfig" class="form-control flatpickr-input"
                         id="caledate"></flat-pickr>
-                      <span class="text-danger" v-if="v$.hospitalization_date?.$error">Дата госпитализации обязательна</span>
+                      <span class="text-danger" v-if="v$.pci_duration?.$error">Дата госпитализации обязательна</span>
                     </div>
                   </div>
                 </BCol>
@@ -414,7 +414,7 @@ watch(
                       <BFormSelectOption value="emergency">экстренная
                       </BFormSelectOption>
                     </BFormSelect>
-                    <span class="text-danger" v-if="v$.hospitalization_date.$error">Тип госпитализации
+                    <span class="text-danger" v-if="v$.pci_duration.$error">Тип госпитализации
                       обязательна</span>
                   </div>
                 </BCol>

@@ -55,7 +55,7 @@ export default {
             patient_condition: null,
             patient_complaints: "",
             heart_stopped: false,
-            hospitalization_date: "",
+            pci_duration: "",
             hospitalization_type: null,
             diagnosed_by: null,
             additional_information: "",
@@ -64,7 +64,7 @@ export default {
         });
         const rules = computed(() => ({
             admission_date: { required },
-            hospitalization_date: { },
+            pci_duration: { },
             hospitalization_type: { required },
             patient_condition: { required },
         }));
@@ -131,7 +131,7 @@ export default {
         function translate(text) {
             const translations = {
                 "admission_date": "Дата и время поступления",
-                "hospitalization_date": "Время выполнения ЧКВ",
+                "pci_duration": "Время выполнения ЧКВ",
                 "hospitalization_type": "Тип госпитализации",
                 "patient_condition": "Состояние пациента при поступлении",
                 "This field should be at least 6 characters long": "Минимальная длина — 6 символов.",
@@ -426,10 +426,10 @@ export default {
                                 <label class="form-label fw-bold">Время выполнения ЧКВ</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="ri-calendar-event-line"></i></span>
-                                    <flat-pickr placeholder="Выберите дату" v-model="admissionDataForm.hospitalization_date
+                                    <flat-pickr placeholder="Выберите дату" v-model="admissionDataForm.pci_duration
                                         " :config="DateConfig" class="form-control flatpickr-input"
                                         id="caledate"></flat-pickr>
-                                    <span class="text-danger" v-if="v$.hospitalization_date?.$error">Дата госпитализации
+                                    <span class="text-danger" v-if="v$.pci_duration?.$error">Дата госпитализации
                                         обязательна</span>
                                 </div>
                             </div>
@@ -439,10 +439,10 @@ export default {
                                 <label class="form-label fw-bold">Время выполнения ЧКВ</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="ri-time-line"></i></span>
-                                    <flat-pickr placeholder="Выбрать...  ч./мин." v-model="admissionDataForm.hospitalization_date
+                                    <flat-pickr placeholder="Выбрать...  ч./мин." v-model="admissionDataForm.pci_duration
                                         " :config="timeConfig" class="form-control flatpickr-input"
                                         id="caledate"></flat-pickr>
-                                    <span class="text-danger" v-if="v$.hospitalization_date?.$error">Дата госпитализации
+                                    <span class="text-danger" v-if="v$.pci_duration?.$error">Дата госпитализации
                                         обязательна</span>
                                 </div>
                             </div>
@@ -462,7 +462,7 @@ export default {
                                     <BFormSelectOption value="emergency">экстренная
                                     </BFormSelectOption>
                                 </BFormSelect>
-                                <span class="text-danger" v-if="v$.hospitalization_date.$error">Тип госпитализации
+                                <span class="text-danger" v-if="v$.pci_duration.$error">Тип госпитализации
                                     обязательна</span>
                             </div>
                         </BCol>
