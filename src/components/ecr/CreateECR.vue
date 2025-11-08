@@ -144,6 +144,7 @@ const rules = {
     pulse_rate: { required,numeric, },
     creatinine: { required, numeric, },
     troponin: { required, numeric,  },
+    ami_date: { required },
     coronary_insufficiency: { required },
     ami_localization: { required },
     mi_type: { required },
@@ -190,7 +191,9 @@ const localization = ref({
     "posterolateral": "Заднебоковой",
     "posteroseptal": "Заднеперегородочный",
     "septal": "Перегородочный",
-    "right_ventricle": "Правый желудочек"
+    "right_ventricle": "Правый желудочек",
+    "ami_date": "Дата перенесенного ИМ",
+    "pulse_rate": "ЧСС",
 });
 const coronary_arteries = ref({
     'left_coronary_artery_trunk': 'Ствол левой коронарной артерии',
@@ -367,6 +370,8 @@ const onHandlesubmit = async () => {
                 anxiety_level: "Уровень тревоги",
                 depression_level: "Уровень депрессии",
                 complications: "Осложнения",
+                ami_date: "Дата перенесенного ИМ",
+                pulse_rate: "ЧСС",
             }[field] || field;
 
             // Добавляем сообщение об ошибке
@@ -899,11 +904,13 @@ onMounted(async () => {
                                                     <div class="input-group">
                                                         <span class="input-group-text"><i
                                                                 class="ri-calendar-event-line"></i></span>
-                                                        <flat-pickr placeholder="Выберите дату"
+                                                        <flat-pickr placeholder="Выберите дату" 
                                                             v-model="ca_sheets.ami_date" :config="dateTimeConfig"
                                                             class="form-control flatpickr-input"
                                                             id="caledate"></flat-pickr>
+                                                            <!-- required -->
                                                     </div>
+                                                    <span class="text-danger" v-if="v$.ami_date.$error">Обязательно</span>
                                                 </div>
                                                 <div class="my-3">
                                                     <label class="form-label fw-bold">Локализация</label>

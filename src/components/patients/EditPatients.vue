@@ -51,6 +51,7 @@ const form = ref({
     birth_date: null,
     pinfl: "",
     passport: "",
+    password: "",
     age: null,
     gender: null,
     ethnicity: null,
@@ -94,7 +95,7 @@ const maxLengthWithoutSpaces = (max) => (value) => {
     return !value || value.replace(/\s/g, '').length <= max;
 };
 
-// const showPassword = ref(false)
+const showPassword = ref(false)
 const rules = {
     first_name: { required },
     last_name: { required },
@@ -111,7 +112,7 @@ const rules = {
         required: helpers.withMessage('Поле обязательно для заполнения', required),
         digitsOnlyValidator
     },
-    // password: { minLength: minLength(6) },
+    password: { minLength: minLength(6) },
     // confirm_password: {
     //     // required: helpers.withMessage('Подтвердите пароль', required),
     //     sameAsPassword: sameAs(computed(() => form.value.password)),
@@ -325,11 +326,15 @@ const handleSubmit = async () => {
     }
 
     try {
+        console.log(form.value);
+        
         form.value.phone = form.value.phone.replace(/[\s()-]/g, "");
         form.value.additional_phone_number = form.value.additional_phone_number.replace(/[\s()-]/g, "");
         form.value.passport = form.value.passport.replace(/[\s()-]/g, '');
         // delete form.value.confirm_password
-        // if(!form.value.password) delete form.value.password
+        if(form.value.password)
+            form.value.password = `${form.value.password}`
+        // if(form.value.password?.trim() === '' || form.value.password == null || form.value.password == undefined) delete form.value
 
         const responsePatient = await axiosInstance.put(`/patients/${route.params.id}/`, form.value);
 
@@ -550,7 +555,7 @@ onMounted(async () => {
                                                 </div>
                                             </BCol>
 
-                                            <!-- <BCol sm="4">
+                                            <BCol sm="4">
                                                 <div class="mb-3">
                                                     <label class="form-label">Пароль
                                                     </label>
@@ -581,7 +586,7 @@ onMounted(async () => {
                                                     </div>
                                                 </div>
                                             </BCol>
-    
+                                            <!-- 
                                             <BCol sm="4">
                                                 <div class="mb-3">
                                                     <label class="form-label">Повторите пароль</label>

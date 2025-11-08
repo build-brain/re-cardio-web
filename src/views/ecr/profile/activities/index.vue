@@ -14,7 +14,7 @@
                     <i class="ri-add-line align-bottom me-1"></i> {{ $t('add') }}
                   </BButton>
 
-                  <BButton type="button" variant="primary" @click="printTable" class="btn"> <i
+                  <BButton type="button" variant="primary" @click="printWord" class="btn"> <i
                       class="ri-file-line align-bottom"></i>
                     Экспрот
                   </BButton>
@@ -198,6 +198,18 @@ import flatPickr from "vue-flatpickr-component";
 import "flatpickr/dist/flatpickr.css";
 import useVuelidate from "@vuelidate/core";
 import { required, numeric } from "@vuelidate/validators";
+import { saveAs } from 'file-saver';
+import {
+  Document,
+  Packer,
+  Paragraph,
+  Table,
+  TableRow,
+  TableCell,
+  TextRun,
+  WidthType,
+  AlignmentType,
+} from 'docx';
 
 const defaultOptions = { animationData: animationData };
 const route = useRoute();
@@ -544,6 +556,179 @@ const printTable = async () => {
     console.error('Error fetching or embedding font:', error);
   }
 };
+
+const printWord = async () => {
+  try {
+    const patientFullName = `${patient.value.last_name} ${patient.value.first_name} ${patient.value.middle_name}`;
+    const patientBirthDate = new Date(patient.value.birth_date);
+    const patientAge = new Date().getFullYear() - patientBirthDate.getFullYear();
+    const dateOIM = new Date(patient.value.created_at).toLocaleDateString();
+    const severityClass = ca_sheets.value.patient_severity_class;
+
+    // 🔹 Заголовок документа
+    const title = new Paragraph({
+      children: [
+        new TextRun({
+          text: 'ПРОГРАММА ФИЗИЧЕСКОЙ РЕАБИЛИТАЦИИ',
+          bold: true,
+          size: 28,
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+    });
+
+    // 🔹 Таблица с данными пациента
+    const patientTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: 'single', size: 1 },
+        bottom: { style: 'single', size: 1 },
+        left: { style: 'single', size: 1 },
+        right: { style: 'single', size: 1 },
+        insideHorizontal: { style: 'single', size: 1 },
+        insideVertical: { style: 'single', size: 1 },
+      },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({ text: 'Пациент', alignment: AlignmentType.CENTER, bold: true })],
+            }),
+            new TableCell({
+              children: [new Paragraph({ text: 'Год рождения', alignment: AlignmentType.CENTER, bold: true })],
+            }),
+            new TableCell({
+              children: [new Paragraph({ text: 'Возраст', alignment: AlignmentType.CENTER, bold: true })],
+            }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph(patientFullName)] }),
+            new TableCell({
+              children: [new Paragraph(String(patientBirthDate.getFullYear()))],
+            }),
+            new TableCell({ children: [new Paragraph(String(patientAge))] }),
+          ],
+        }),
+      ],
+    });
+
+    // 🔹 Таблица с датой ОИМ и классом тяжести
+    const infoTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: 'single', size: 1 },
+        bottom: { style: 'single', size: 1 },
+        left: { style: 'single', size: 1 },
+        right: { style: 'single', size: 1 },
+        insideHorizontal: { style: 'single', size: 1 },
+        insideVertical: { style: 'single', size: 1 },
+      },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({ text: 'Дата ОИМ', alignment: AlignmentType.CENTER, bold: true })],
+            }),
+            new TableCell({
+              children: [new Paragraph({ text: 'Класс Тяжести', alignment: AlignmentType.CENTER, bold: true })],
+            }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph(dateOIM)] }),
+            new TableCell({ children: [new Paragraph(String(severityClass))] }),
+          ],
+        }),
+      ],
+    });
+
+    // 🔹 Таблица со ступенями ДА
+    const activityRows = [
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [new Paragraph({ text: 'Ступени ДА', bold: true, alignment: AlignmentType.CENTER })],
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: 'Сроки ДА (Начало)', bold: true, alignment: AlignmentType.CENTER })],
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: 'Сроки ДА (Окончание)', bold: true, alignment: AlignmentType.CENTER })],
+          }),
+          new TableCell({
+            children: [new Paragraph({ text: 'Описание целей двигательной активности', bold: true, alignment: AlignmentType.CENTER })],
+          }),
+        ],
+      }),
+
+      // 🔸 Строки активности
+      ...activities.value.map((a) => {
+        const stage = a.activity_stage ? String(a.activity_stage) : '-';
+        const start = a.start_date ? new Date(a.start_date).toLocaleDateString() : '-';
+        const end = a.end_date ? new Date(a.end_date).toLocaleDateString() : '-';
+        const goal = a.goal?.trim() ? a.goal : '-';
+
+        return new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({ text: stage, alignment: AlignmentType.CENTER })],
+            }),
+            new TableCell({
+              children: [new Paragraph({ text: start, alignment: AlignmentType.CENTER })],
+            }),
+            new TableCell({
+              children: [new Paragraph({ text: end, alignment: AlignmentType.CENTER })],
+            }),
+            new TableCell({
+              children: [new Paragraph({ text: goal })],
+            }),
+          ],
+        });
+      }),
+    ];
+
+    const activityTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: 'single', size: 1 },
+        bottom: { style: 'single', size: 1 },
+        left: { style: 'single', size: 1 },
+        right: { style: 'single', size: 1 },
+        insideHorizontal: { style: 'single', size: 1 },
+        insideVertical: { style: 'single', size: 1 },
+      },
+      rows: activityRows,
+    });
+
+    // 🔹 Итоговый документ
+    const doc = new Document({
+      sections: [
+        {
+          children: [
+            title,
+            patientTable,
+            new Paragraph({ text: '' }), // Отступ
+            infoTable,
+            new Paragraph({ text: '' }), // Отступ
+            activityTable,
+          ],
+        },
+      ],
+    });
+
+    // 💾 Сохраняем как .docx
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, 'rehabilitation_program.docx');
+  } catch (error) {
+    console.error('Ошибка при создании Word-документа:', error);
+  }
+};
+
+
 
 onMounted(async () => {
   await getAcivities();
