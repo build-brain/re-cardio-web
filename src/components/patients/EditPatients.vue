@@ -332,9 +332,12 @@ const handleSubmit = async () => {
         form.value.additional_phone_number = form.value.additional_phone_number.replace(/[\s()-]/g, "");
         form.value.passport = form.value.passport.replace(/[\s()-]/g, '');
         // delete form.value.confirm_password
-        if(form.value.password)
-            form.value.password = `${form.value.password}`
-        // if(form.value.password?.trim() === '' || form.value.password == null || form.value.password == undefined) delete form.value
+        if (form.value.password && form.value.password.trim() !== '') {
+            form.value.password = `${form.value.password}`;
+        } else {
+            delete form.value.password
+        }
+
 
         const responsePatient = await axiosInstance.put(`/patients/${route.params.id}/`, form.value);
 
