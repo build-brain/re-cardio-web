@@ -209,6 +209,8 @@ import {
   TextRun,
   WidthType,
   AlignmentType,
+  VerticalAlign,
+  BorderStyle,
 } from 'docx';
 
 const defaultOptions = { animationData: animationData };
@@ -566,16 +568,32 @@ const printWord = async () => {
     const severityClass = ca_sheets.value.patient_severity_class;
 
     // 🔹 Заголовок документа
-    const title = new Paragraph({
-      children: [
-        new TextRun({
-          text: 'ПРОГРАММА ФИЗИЧЕСКОЙ РЕАБИЛИТАЦИИ',
-          bold: true,
-          size: 28,
+    const title = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: 'single', size: 1 },
+        bottom: { style: 'single', size: 1 },
+        left: { style: 'single', size: 1 },
+        right: { style: 'single', size: 1 },
+        insideHorizontal: { style: 'single', size: 1 },
+        insideVertical: { style: 'single', size: 1 },
+      },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [
+                new Paragraph({
+                  text: 'ПРОГРАММА ФИЗИЧЕСКОЙ РЕАБИЛИТАЦИИ',
+                  bold: true,
+                  size: 28,
+                  alignment: AlignmentType.CENTER
+                }),
+              ],
+            }),
+          ]
         }),
-      ],
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 200 },
+      ]
     });
 
     // 🔹 Таблица с данными пациента
@@ -593,23 +611,30 @@ const printWord = async () => {
         new TableRow({
           children: [
             new TableCell({
+              width: { size: 100/3, type: WidthType.PERCENTAGE },
               children: [new Paragraph({ text: 'Пациент', alignment: AlignmentType.CENTER, bold: true })],
             }),
             new TableCell({
+              width: { size: 100/3, type: WidthType.PERCENTAGE },
               children: [new Paragraph({ text: 'Год рождения', alignment: AlignmentType.CENTER, bold: true })],
             }),
             new TableCell({
+              width: { size: 100/3, type: WidthType.PERCENTAGE },
               children: [new Paragraph({ text: 'Возраст', alignment: AlignmentType.CENTER, bold: true })],
             }),
           ],
         }),
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph(patientFullName)] }),
             new TableCell({
-              children: [new Paragraph(String(patientBirthDate.getFullYear()))],
+              children: [new Paragraph({ text: patientFullName, alignment: AlignmentType.CENTER })]
             }),
-            new TableCell({ children: [new Paragraph(String(patientAge))] }),
+            new TableCell({
+              children: [new Paragraph({ text: String(patientBirthDate.getFullYear()), alignment: AlignmentType.CENTER })],
+            }),
+            new TableCell({
+              children: [new Paragraph({ text: String(patientAge), alignment: AlignmentType.CENTER })]
+            }),
           ],
         }),
       ],
@@ -630,17 +655,25 @@ const printWord = async () => {
         new TableRow({
           children: [
             new TableCell({
+              width: { size: 100/2, type: WidthType.PERCENTAGE },
               children: [new Paragraph({ text: 'Дата ОИМ', alignment: AlignmentType.CENTER, bold: true })],
             }),
             new TableCell({
+              width: { size: 100/2, type: WidthType.PERCENTAGE },
               children: [new Paragraph({ text: 'Класс Тяжести', alignment: AlignmentType.CENTER, bold: true })],
             }),
           ],
         }),
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph(dateOIM)] }),
-            new TableCell({ children: [new Paragraph(String(severityClass))] }),
+            new TableCell({
+              width: { size: 100/2, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ text: dateOIM, alignment: AlignmentType.CENTER })]
+            }),
+            new TableCell({
+              width: { size: 100/2, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ text: String(severityClass), alignment: AlignmentType.CENTER })]
+            }),
           ],
         }),
       ],
@@ -651,15 +684,19 @@ const printWord = async () => {
       new TableRow({
         children: [
           new TableCell({
+            width: { size: 100/6, type: WidthType.PERCENTAGE },
             children: [new Paragraph({ text: 'Ступени ДА', bold: true, alignment: AlignmentType.CENTER })],
           }),
           new TableCell({
+            width: { size: 100/6, type: WidthType.PERCENTAGE },
             children: [new Paragraph({ text: 'Сроки ДА (Начало)', bold: true, alignment: AlignmentType.CENTER })],
           }),
           new TableCell({
+            width: { size: 100/6, type: WidthType.PERCENTAGE },
             children: [new Paragraph({ text: 'Сроки ДА (Окончание)', bold: true, alignment: AlignmentType.CENTER })],
           }),
           new TableCell({
+            width: { size: 100/2, type: WidthType.PERCENTAGE },
             children: [new Paragraph({ text: 'Описание целей двигательной активности', bold: true, alignment: AlignmentType.CENTER })],
           }),
         ],
@@ -684,7 +721,8 @@ const printWord = async () => {
               children: [new Paragraph({ text: end, alignment: AlignmentType.CENTER })],
             }),
             new TableCell({
-              children: [new Paragraph({ text: goal })],
+              margins: { top: 10, bottom: 10, left: 10, right: 10 },
+              children: [new Paragraph({ text: goal, alignment: AlignmentType.CENTER })],
             }),
           ],
         });
@@ -710,6 +748,7 @@ const printWord = async () => {
         {
           children: [
             title,
+            new Paragraph({ text: '' }), // Отступ
             patientTable,
             new Paragraph({ text: '' }), // Отступ
             infoTable,
