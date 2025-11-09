@@ -567,142 +567,311 @@ const printWord = async () => {
     const dateOIM = new Date(patient.value.created_at).toLocaleDateString();
     const severityClass = ca_sheets.value.patient_severity_class;
 
-    // 🔹 Заголовок документа
-    const title = new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      borders: {
-        top: { style: 'single', size: 1 },
-        bottom: { style: 'single', size: 1 },
-        left: { style: 'single', size: 1 },
-        right: { style: 'single', size: 1 },
-        insideHorizontal: { style: 'single', size: 1 },
-        insideVertical: { style: 'single', size: 1 },
-      },
-      rows: [
-        new TableRow({
-          children: [
-            new TableCell({
-              children: [
-                new Paragraph({
-                  text: 'ПРОГРАММА ФИЗИЧЕСКОЙ РЕАБИЛИТАЦИИ',
-                  bold: true,
-                  size: 28,
-                  alignment: AlignmentType.CENTER
-                }),
-              ],
-            }),
-          ]
-        }),
-      ]
-    });
+    // 🔹 Общие настройки для ячеек
+    const headerMargins = { top: 150, bottom: 150, left: 100, right: 100 };
+    const cellMargins = { top: 100, bottom: 100, left: 100, right: 100 };
+    const descriptionMargins = { top: 150, bottom: 150, left: 200, right: 200 };
 
-    // 🔹 Таблица с данными пациента
-    const patientTable = new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      borders: {
-        top: { style: 'single', size: 1 },
-        bottom: { style: 'single', size: 1 },
-        left: { style: 'single', size: 1 },
-        right: { style: 'single', size: 1 },
-        insideHorizontal: { style: 'single', size: 1 },
-        insideVertical: { style: 'single', size: 1 },
-      },
-      rows: [
-        new TableRow({
-          children: [
-            new TableCell({
-              width: { size: 100/3, type: WidthType.PERCENTAGE },
-              children: [new Paragraph({ text: 'Пациент', alignment: AlignmentType.CENTER, bold: true })],
-            }),
-            new TableCell({
-              width: { size: 100/3, type: WidthType.PERCENTAGE },
-              children: [new Paragraph({ text: 'Год рождения', alignment: AlignmentType.CENTER, bold: true })],
-            }),
-            new TableCell({
-              width: { size: 100/3, type: WidthType.PERCENTAGE },
-              children: [new Paragraph({ text: 'Возраст', alignment: AlignmentType.CENTER, bold: true })],
-            }),
-          ],
-        }),
-        new TableRow({
-          children: [
-            new TableCell({
-              children: [new Paragraph({ text: patientFullName, alignment: AlignmentType.CENTER })]
-            }),
-            new TableCell({
-              children: [new Paragraph({ text: String(patientBirthDate.getFullYear()), alignment: AlignmentType.CENTER })],
-            }),
-            new TableCell({
-              children: [new Paragraph({ text: String(patientAge), alignment: AlignmentType.CENTER })]
-            }),
-          ],
-        }),
-      ],
-    });
-
-    // 🔹 Таблица с датой ОИМ и классом тяжести
-    const infoTable = new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      borders: {
-        top: { style: 'single', size: 1 },
-        bottom: { style: 'single', size: 1 },
-        left: { style: 'single', size: 1 },
-        right: { style: 'single', size: 1 },
-        insideHorizontal: { style: 'single', size: 1 },
-        insideVertical: { style: 'single', size: 1 },
-      },
-      rows: [
-        new TableRow({
-          children: [
-            new TableCell({
-              width: { size: 100/2, type: WidthType.PERCENTAGE },
-              children: [new Paragraph({ text: 'Дата ОИМ', alignment: AlignmentType.CENTER, bold: true })],
-            }),
-            new TableCell({
-              width: { size: 100/2, type: WidthType.PERCENTAGE },
-              children: [new Paragraph({ text: 'Класс Тяжести', alignment: AlignmentType.CENTER, bold: true })],
-            }),
-          ],
-        }),
-        new TableRow({
-          children: [
-            new TableCell({
-              width: { size: 100/2, type: WidthType.PERCENTAGE },
-              children: [new Paragraph({ text: dateOIM, alignment: AlignmentType.CENTER })]
-            }),
-            new TableCell({
-              width: { size: 100/2, type: WidthType.PERCENTAGE },
-              children: [new Paragraph({ text: String(severityClass), alignment: AlignmentType.CENTER })]
-            }),
-          ],
-        }),
-      ],
-    });
-
-    // 🔹 Таблица со ступенями ДА
-    const activityRows = [
+    // 🔹 Создаем все строки для единой таблицы
+    const allRows = [
+      // Заголовок документа
       new TableRow({
+        height: { value: 800, rule: 'atLeast' },
         children: [
           new TableCell({
-            width: { size: 100/6, type: WidthType.PERCENTAGE },
-            children: [new Paragraph({ text: 'Ступени ДА', bold: true, alignment: AlignmentType.CENTER })],
+            columnSpan: 4,
+            margins: { top: 200, bottom: 200, left: 100, right: 100 },
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'ПРОГРАММА ФИЗИЧЕСКОЙ РЕАБИЛИТАЦИИ',
+                    bold: true,
+                    size: 28,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              }),
+            ],
+          }),
+        ]
+      }),
+
+      // Заголовки данных пациента
+      new TableRow({
+        height: { value: 500, rule: 'atLeast' },
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Пациент',
+                    bold: true,
+                    size: 22,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
           }),
           new TableCell({
-            width: { size: 100/6, type: WidthType.PERCENTAGE },
-            children: [new Paragraph({ text: 'Сроки ДА (Начало)', bold: true, alignment: AlignmentType.CENTER })],
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Год рождения',
+                    bold: true,
+                    size: 22,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
           }),
           new TableCell({
-            width: { size: 100/6, type: WidthType.PERCENTAGE },
-            children: [new Paragraph({ text: 'Сроки ДА (Окончание)', bold: true, alignment: AlignmentType.CENTER })],
-          }),
-          new TableCell({
-            width: { size: 100/2, type: WidthType.PERCENTAGE },
-            children: [new Paragraph({ text: 'Описание целей двигательной активности', bold: true, alignment: AlignmentType.CENTER })],
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Возраст',
+                    bold: true,
+                    size: 22,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
           }),
         ],
       }),
 
-      // 🔸 Строки активности
+      // Данные пациента
+      new TableRow({
+        height: { value: 500, rule: 'atLeast' },
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            margins: cellMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: patientFullName,
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ]
+          }),
+          new TableCell({
+            margins: cellMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: String(patientBirthDate.getFullYear()),
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
+          }),
+          new TableCell({
+            margins: cellMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: String(patientAge),
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ]
+          }),
+        ],
+      }),
+
+      // Заголовки даты ОИМ и класса тяжести
+      new TableRow({
+        height: { value: 500, rule: 'atLeast' },
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Дата ОИМ',
+                    bold: true,
+                    size: 22,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
+          }),
+          new TableCell({
+            columnSpan: 2,
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Класс Тяжести',
+                    bold: true,
+                    size: 22,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
+          }),
+        ],
+      }),
+
+      // Данные даты ОИМ и класса тяжести
+      new TableRow({
+        height: { value: 500, rule: 'atLeast' },
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            margins: cellMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: dateOIM,
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ]
+          }),
+          new TableCell({
+            columnSpan: 2,
+            margins: cellMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: String(severityClass),
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ]
+          }),
+        ],
+      }),
+
+      // Заголовки ступеней ДА
+      new TableRow({
+        height: { value: 600, rule: 'atLeast' },
+        children: [
+          new TableCell({
+            width: { size: 10, type: WidthType.PERCENTAGE },
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Ступени ДА',
+                    bold: true,
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
+          }),
+          new TableCell({
+            width: { size: 18, type: WidthType.PERCENTAGE },
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Сроки ДА (Начало)',
+                    bold: true,
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
+          }),
+          new TableCell({
+            width: { size: 20, type: WidthType.PERCENTAGE },
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Сроки ДА (Окончание)',
+                    bold: true,
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
+          }),
+          new TableCell({
+            width: { size: 52, type: WidthType.PERCENTAGE },
+            margins: headerMargins,
+            verticalAlign: VerticalAlign.CENTER,
+            shading: { fill: 'F0F0F0' },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Описание целей двигательной активности',
+                    bold: true,
+                    size: 20,
+                  })
+                ],
+                alignment: AlignmentType.CENTER
+              })
+            ],
+          }),
+        ],
+      }),
+
+      // Строки активности
       ...activities.value.map((a) => {
         const stage = a.activity_stage ? String(a.activity_stage) : '-';
         const start = a.start_date ? new Date(a.start_date).toLocaleDateString() : '-';
@@ -710,51 +879,103 @@ const printWord = async () => {
         const goal = a.goal?.trim() ? a.goal : '-';
 
         return new TableRow({
+          height: { value: 600, rule: 'atLeast' },
           children: [
             new TableCell({
-              children: [new Paragraph({ text: stage, alignment: AlignmentType.CENTER })],
+              margins: cellMargins,
+              verticalAlign: VerticalAlign.CENTER,
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: stage,
+                      size: 20,
+                    })
+                  ],
+                  alignment: AlignmentType.CENTER
+                })
+              ],
             }),
             new TableCell({
-              children: [new Paragraph({ text: start, alignment: AlignmentType.CENTER })],
+              margins: cellMargins,
+              verticalAlign: VerticalAlign.CENTER,
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: start,
+                      size: 20,
+                    })
+                  ],
+                  alignment: AlignmentType.CENTER
+                })
+              ],
             }),
             new TableCell({
-              children: [new Paragraph({ text: end, alignment: AlignmentType.CENTER })],
+              margins: cellMargins,
+              verticalAlign: VerticalAlign.CENTER,
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: end,
+                      size: 20,
+                    })
+                  ],
+                  alignment: AlignmentType.CENTER
+                })
+              ],
             }),
             new TableCell({
-              margins: { top: 10, bottom: 10, left: 10, right: 10 },
-              children: [new Paragraph({ text: goal, alignment: AlignmentType.CENTER })],
+              margins: descriptionMargins,
+              verticalAlign: VerticalAlign.CENTER,
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: goal,
+                      size: 19,
+                    })
+                  ],
+                  alignment: AlignmentType.LEFT,
+                  spacing: { line: 320 }
+                })
+              ],
             }),
           ],
         });
       }),
     ];
 
-    const activityTable = new Table({
+    // 🔹 Единая таблица со всеми данными
+    const mainTable = new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       borders: {
-        top: { style: 'single', size: 1 },
-        bottom: { style: 'single', size: 1 },
-        left: { style: 'single', size: 1 },
-        right: { style: 'single', size: 1 },
-        insideHorizontal: { style: 'single', size: 1 },
-        insideVertical: { style: 'single', size: 1 },
+        top: { style: BorderStyle.SINGLE, size: 6, color: '000000' },
+        bottom: { style: BorderStyle.SINGLE, size: 6, color: '000000' },
+        left: { style: BorderStyle.SINGLE, size: 6, color: '000000' },
+        right: { style: BorderStyle.SINGLE, size: 6, color: '000000' },
+        insideHorizontal: { style: BorderStyle.SINGLE, size: 6, color: '000000' },
+        insideVertical: { style: BorderStyle.SINGLE, size: 6, color: '000000' },
       },
-      rows: activityRows,
+      rows: allRows,
     });
 
     // 🔹 Итоговый документ
     const doc = new Document({
       sections: [
         {
-          children: [
-            title,
-            new Paragraph({ text: '' }), // Отступ
-            patientTable,
-            new Paragraph({ text: '' }), // Отступ
-            infoTable,
-            new Paragraph({ text: '' }), // Отступ
-            activityTable,
-          ],
+          properties: {
+            page: {
+              margin: {
+                top: 720,
+                right: 720,
+                bottom: 720,
+                left: 720,
+              },
+            },
+          },
+          children: [mainTable],
         },
       ],
     });
